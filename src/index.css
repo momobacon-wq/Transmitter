@@ -1,0 +1,17 @@
+/* Global Styles */
+
+body {
+    font-family: "Press Start 2P", cursive;
+    background-color: #212529;
+    color: #fff;
+    padding: 20px;
+}
+
+.container {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+button {
+    font-family: inherit;
+}
