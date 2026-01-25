@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@babel/helper-validator-identifier": "^7.28.5",
-    "axios": "^1.13.2",
     "nes.css": "^2.2.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
