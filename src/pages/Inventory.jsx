@@ -224,27 +224,33 @@ const Inventory = () => {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                     gap: '1.5rem'
                 }}>
-                    {[...inventory].filter(item => {
-                        if (!searchQuery) return true;
-                        const lowerQuery = searchQuery.toLowerCase();
-                        return (
-                            String(item.partNumber).toLowerCase().includes(lowerQuery) ||
-                            String(item.name).toLowerCase().includes(lowerQuery) ||
-                            String(item.spec).toLowerCase().includes(lowerQuery) ||
-                            String(item.location).toLowerCase().includes(lowerQuery)
-                        );
-                    }).sort((a, b) => {
-                        let comparison = 0;
-                        if (sortConfig.field === 'quantity') {
-                            comparison = a.quantity - b.quantity;
-                        } else {
-                            // Numeric sort for partNumber if possible, else string
-                            comparison = String(a.partNumber).localeCompare(String(b.partNumber), undefined, { numeric: true });
-                        }
-                        return sortConfig.direction === 'asc' ? comparison : -comparison;
-                    }).map(item => (
-                        <ItemCard key={item.partNumber} item={item} onAction={confirmAction} />
-                    ))}
+                    {/* DEBUG: Show Search State */}
+                    {/* <p style={{gridColumn: '1/-1'}}>Search: "{searchQuery}" (Items: {inventory.length})</p> */}
+
+                    {[...new Map(inventory.map(item => [item.partNumber, item])).values()] // Deduplicate by PartNumber
+                        .filter(item => {
+                            if (!searchQuery) return true;
+                            const lowerQuery = searchQuery.toLowerCase().trim();
+                            if (!lowerQuery) return true;
+
+                            return (
+                                String(item.partNumber || '').toLowerCase().includes(lowerQuery) ||
+                                String(item.name || '').toLowerCase().includes(lowerQuery) ||
+                                String(item.spec || '').toLowerCase().includes(lowerQuery) ||
+                                String(item.location || '').toLowerCase().includes(lowerQuery)
+                            );
+                        }).sort((a, b) => {
+                            let comparison = 0;
+                            if (sortConfig.field === 'quantity') {
+                                comparison = a.quantity - b.quantity;
+                            } else {
+                                // Numeric sort for partNumber if possible, else string
+                                comparison = String(a.partNumber).localeCompare(String(b.partNumber), undefined, { numeric: true });
+                            }
+                            return sortConfig.direction === 'asc' ? comparison : -comparison;
+                        }).map(item => (
+                            <ItemCard key={item.partNumber} item={item} onAction={confirmAction} />
+                        ))}
                 </div>
             )}
 
