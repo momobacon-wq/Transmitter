@@ -6,8 +6,10 @@ const STORAGE_KEYS = {
 
 // Initial Default Data (Simulating a fresh install)
 const DEFAULT_INVENTORY = [
-    { partNumber: '214CTKAKT2SG', name: '', brand: '', spec: '', location: '已決標', quantity: 5, imageSeed: '214c' },
-    { partNumber: 'EXAMPLE-002', name: '無線模組', brand: 'Generic', spec: '2.4GHz', location: '庫存區 A', quantity: 10, imageSeed: 'ex2' },
+    { partNumber: 'MOCK-001', name: 'Flux Capacitor', brand: 'Dr. Brown Ent.', spec: '1.21 GW', location: 'A-01', quantity: 10, imageSeed: 'flux' },
+    { partNumber: 'MOCK-002', name: 'Fusion Cell', brand: 'Vault-Tec', spec: 'Mk I', location: 'B-02', quantity: 2, imageSeed: 'fusion' },
+    { partNumber: 'MOCK-003', name: 'Power Node', brand: 'CEC', spec: 'v5', location: 'C-03', quantity: 0, imageSeed: 'node' },
+    { partNumber: 'MOCK-004', name: 'Steam Valve', brand: 'Valve Corp', spec: 'Iron', location: 'D-04', quantity: 15, imageSeed: 'valve' },
 ];
 
 /**
