@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { GameProvider, useGame } from './context/GameContext';
 import Login from './pages/Login';
 import Inventory from './pages/Inventory';
@@ -10,6 +11,10 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/" replace />;
     }
     return children;
+};
+
+ProtectedRoute.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 function AppContent() {

@@ -5,6 +5,7 @@ const AddItemModal = ({ isOpen, onClose, onConfirm }) => {
     const [formData, setFormData] = useState({
         partNumber: '',
         name: '',
+        brand: '',
         spec: '',
         location: '',
         quantity: 0
@@ -26,7 +27,7 @@ const AddItemModal = ({ isOpen, onClose, onConfirm }) => {
             return;
         }
         onConfirm(formData);
-        setFormData({ partNumber: '', name: '', spec: '', location: '', quantity: 0 }); // Reset
+        setFormData({ partNumber: '', name: '', brand: '', spec: '', location: '', quantity: 0 }); // Reset
     };
 
     return (
@@ -53,6 +54,11 @@ const AddItemModal = ({ isOpen, onClose, onConfirm }) => {
                 <div className="nes-field" style={{ marginBottom: '1rem' }}>
                     <label htmlFor="name" style={{ color: '#fff' }}>通訊</label>
                     <input type="text" id="name" name="name" className="nes-input" value={formData.name} onChange={handleChange} placeholder="例如: 超級引擎" />
+                </div>
+
+                <div className="nes-field" style={{ marginBottom: '1rem' }}>
+                    <label htmlFor="brand" style={{ color: '#fff' }}>廠牌</label>
+                    <input type="text" id="brand" name="brand" className="nes-input" value={formData.brand} onChange={handleChange} placeholder="例如: ACME Corp" />
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>

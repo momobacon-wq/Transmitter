@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import { getInventory, updateStock, addItem, getLogs } from '../services/api';
 import ItemCard from '../components/ItemCard';
@@ -28,7 +28,7 @@ const Inventory = () => {
     const isProcessingRef = useRef(false);
     const lastActionTimeRef = useRef(0);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         // Prevent background refresh from overwriting optimistic updates during user interaction
         if (isProcessingRef.current) return;
 
@@ -60,7 +60,7 @@ const Inventory = () => {
             setLoading(false);
             setInitLoad(false);
         }
-    };
+    }, [setInventory, setLoading, showMessage]);
 
     useEffect(() => {
         fetchData();
@@ -69,7 +69,7 @@ const Inventory = () => {
         const intervalMs = import.meta.env.VITE_REFRESH_INTERVAL || 30000;
         const interval = setInterval(fetchData, intervalMs);
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchData]);
 
     const confirmAction = (actionType, item) => {
         setModalState({
@@ -236,6 +236,7 @@ const Inventory = () => {
                             return (
                                 String(item.partNumber || '').toLowerCase().includes(lowerQuery) ||
                                 String(item.name || '').toLowerCase().includes(lowerQuery) ||
+                                String(item.brand || '').toLowerCase().includes(lowerQuery) ||
                                 String(item.spec || '').toLowerCase().includes(lowerQuery) ||
                                 String(item.location || '').toLowerCase().includes(lowerQuery)
                             );
@@ -243,6 +244,8 @@ const Inventory = () => {
                             let comparison = 0;
                             if (sortConfig.field === 'quantity') {
                                 comparison = a.quantity - b.quantity;
+                            } else if (sortConfig.field === 'brand') {
+                                comparison = String(a.brand || '').localeCompare(String(b.brand || ''));
                             } else {
                                 // Numeric sort for partNumber if possible, else string
                                 comparison = String(a.partNumber).localeCompare(String(b.partNumber), undefined, { numeric: true });

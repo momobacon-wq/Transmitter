@@ -2,20 +2,15 @@
  * Power Plant Material Management System - Backend Script
  * 
  * INSTRUCTIONS:
- * 1. Create a new Google Sheet.
- * 2. Rename Sheet1 to "Inventory".
- * 3. Create a header row in "Inventory": 
- *    [PartNumber, Name, Spec, Location, Quantity, ImageSeed]
- * 4. Create a second sheet named "Logs".
- * 5. Create a header row in "Logs":
- *    [Timestamp, EmployeeID, ActionType, PartNumber, ChangeAmount, Balance]
- * 6. Tools > Script editor.
- * 7. Paste this code into Code.gs.
- * 8. Deploy > New Deployment > Web App.
- *    - Description: "v1"
- *    - Execute as: "Me"
- *    - Who has access: "Anyone"
- * 9. Copy the Web App URL and paste it into your frontend .env file.
+ * 1. Open your Google Sheet.
+ * 2. In "Inventory" sheet, Insert a new column after "Name" (Column B).
+ * 3. Name the new Column C "Brand".
+ * 4. Ensure header row is: [PartNumber, Name, Brand, Spec, Location, Quantity]
+ *    (You can delete the old ImageSeed column if you want)
+ * 5. Tools > Script editor.
+ * 6. Replace ALL code with this new version.
+ * 7. Deploy > New Deployment > Web App (Version: New, Desc: "v2 Brand Update").
+ * 8. Copy the URL (it should be same if you update properly, but re-copy to be safe).
  */
 
 function doGet(e) {
@@ -63,14 +58,15 @@ function doGet(e) {
         const rows = data.slice(1);
 
         // Map data to JSON objects
+        // Expected Columns: [PartNumber, Name, Brand, Spec, Location, Quantity]
         const inventory = rows.map(row => {
             return {
                 partNumber: row[0],
                 name: row[1],
-                spec: row[2],
-                location: row[3],
-                quantity: row[4],
-                imageSeed: row[5]
+                brand: row[2], // Brand
+                spec: row[3],
+                location: row[4],
+                quantity: row[5]
             };
         });
 
@@ -120,7 +116,7 @@ function doPost(e) {
 
         // === HANDLE ADD ITEM ===
         if (action === "ADD_ITEM") {
-            // newItemData: { partNumber, name, spec, location, quantity }
+            // newItemData: { partNumber, name, brand, spec, location, quantity }
 
             // 1. Check duplicate
             const data = inventorySheet.getDataRange().getValues();
@@ -131,14 +127,14 @@ function doPost(e) {
             }
 
             // 2. Append to Inventory
-            // [PartNumber, Name, Spec, Location, Quantity, ImageSeed]
+            // [PartNumber, Name, Brand, Spec, Location, Quantity]
             inventorySheet.appendRow([
                 newItemData.partNumber,
                 newItemData.name,
+                newItemData.brand || '', // Brand (allow empty)
                 newItemData.spec,
                 newItemData.location,
-                newItemData.quantity,
-                newItemData.partNumber.toLowerCase() // Use part number as seed by default
+                newItemData.quantity
             ]);
 
             // 3. Log
@@ -170,7 +166,8 @@ function doPost(e) {
         for (let i = 1; i < data.length; i++) {
             if (data[i][0] == partNumber) {
                 rowIndex = i;
-                currentQty = parseInt(data[i][4]) || 0; // Quantiy in index 4
+                // Quantity is now in Column 6 (index 5)
+                currentQty = parseInt(data[i][5]) || 0;
                 break;
             }
         }
@@ -187,8 +184,8 @@ function doPost(e) {
         }
 
         // 3. Update Inventory (Row index is 0-based, so +1 for Sheet's 1-based index)
-        // Quantity is 5th column (index 4 -> column 5)
-        inventorySheet.getRange(rowIndex + 1, 5).setValue(newQty);
+        // Quantity is 6th column (index 5 -> column 6)
+        inventorySheet.getRange(rowIndex + 1, 6).setValue(newQty);
 
         // 4. Log Transaction
         logsSheet.insertRowBefore(2);
@@ -219,18 +216,13 @@ function doPost(e) {
     }
 }
 
-/**
- * Setup function to initialize sheets if they don't exist (Optional helper)
- */
 function setup() {
     const doc = SpreadsheetApp.getActiveSpreadsheet();
 
     if (!doc.getSheetByName("Inventory")) {
         const s = doc.insertSheet("Inventory");
-        s.appendRow(["PartNumber", "Name", "Spec", "Location", "Quantity", "ImageSeed"]);
-        // Add some sample data
-        s.appendRow(["P-001", "Core Control Chip", "v2.4", "A-01", 10, "robot-1"]);
-        s.appendRow(["P-002", "Coolant Canister", "5L", "B-03", 2, "robot-2"]);
+        s.appendRow(["PartNumber", "Name", "Brand", "Spec", "Location", "Quantity"]);
+        s.appendRow(["P-001", "Core Control Chip", "Intel", "v2.4", "A-01", 10]);
     }
 
     if (!doc.getSheetByName("Logs")) {

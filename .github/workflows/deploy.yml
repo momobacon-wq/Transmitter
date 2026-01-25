@@ -2,25 +2,20 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [ "main" ]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,22 +32,19 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          # Inject secrets/vars from GitHub Repository Settings
-          # Ensure you add these in Settings -> Secrets and variables -> Actions
-          VITE_GOOGLE_SCRIPT_URL: ${{ secrets.VITE_GOOGLE_SCRIPT_URL }}
-          VITE_LOW_STOCK_THRESHOLD: ${{ vars.VITE_LOW_STOCK_THRESHOLD || 5 }}
-          VITE_REFRESH_INTERVAL: ${{ vars.VITE_REFRESH_INTERVAL || 30000 }}
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: './dist'
+          path: ./dist
 
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

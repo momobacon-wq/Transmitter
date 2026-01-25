@@ -4,10 +4,10 @@ const API_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
 
 // Mock Data State (In-memory for simulation)
 let mockInventory = [
-    { partNumber: 'MOCK-001', name: 'Flux Capacitor', spec: '1.21 GW', location: 'A-01', quantity: 10, imageSeed: 'flux' },
-    { partNumber: 'MOCK-002', name: 'Fusion Cell', spec: 'Mk I', location: 'B-02', quantity: 2, imageSeed: 'fusion' },
-    { partNumber: 'MOCK-003', name: 'Power Node', spec: 'v5', location: 'C-03', quantity: 0, imageSeed: 'node' },
-    { partNumber: 'MOCK-004', name: 'Steam Valve', spec: 'Iron', location: 'D-04', quantity: 15, imageSeed: 'valve' },
+    { partNumber: 'MOCK-001', name: 'Flux Capacitor', brand: 'Dr. Brown Ent.', spec: '1.21 GW', location: 'A-01', quantity: 10, imageSeed: 'flux' },
+    { partNumber: 'MOCK-002', name: 'Fusion Cell', brand: 'Vault-Tec', spec: 'Mk I', location: 'B-02', quantity: 2, imageSeed: 'fusion' },
+    { partNumber: 'MOCK-003', name: 'Power Node', brand: 'CEC', spec: 'v5', location: 'C-03', quantity: 0, imageSeed: 'node' },
+    { partNumber: 'MOCK-004', name: 'Steam Valve', brand: 'Valve Corp', spec: 'Iron', location: 'D-04', quantity: 15, imageSeed: 'valve' },
 ];
 
 // GAS Web Apps often behave better with fetch or axios without complex headers

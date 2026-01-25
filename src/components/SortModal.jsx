@@ -54,6 +54,22 @@ const SortModal = ({ isOpen, onClose, onSort, currentSort }) => {
                             >小 → 大</button>
                         </div>
                     </div>
+
+                    <div>
+                        <p style={{ marginBottom: '0.5rem', color: '#f7d51d' }}>依 廠牌 (Brand) 排序</p>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                className={`nes-btn ${currentSort.field === 'brand' && currentSort.direction === 'desc' ? 'is-primary' : ''}`}
+                                onClick={() => onSort('brand', 'desc')}
+                                style={{ fontSize: '0.7rem', flex: 1 }}
+                            >Z → A</button>
+                            <button
+                                className={`nes-btn ${currentSort.field === 'brand' && currentSort.direction === 'asc' ? 'is-primary' : ''}`}
+                                onClick={() => onSort('brand', 'asc')}
+                                style={{ fontSize: '0.7rem', flex: 1 }}
+                            >A → Z</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
