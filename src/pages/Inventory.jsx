@@ -14,6 +14,7 @@ const Inventory = () => {
     // Local state for fetching status to avoid flickering if already loaded
     const [initLoad, setInitLoad] = useState(true);
     const [loadStatus, setLoadStatus] = useState("LOADING CARTRIDGE...");
+    const [fetchError, setFetchError] = useState(null);
 
 
     // Modal State
@@ -60,14 +61,17 @@ const Inventory = () => {
 
             if (res.status === 'success') {
                 setInventory(res.data);
+                setFetchError(null);
             } else {
                 console.error("Error fetching", res);
                 showMessage("SYNC ERROR", "error");
+                setFetchError(res.message || "Unknown Server Error");
             }
         } catch (err) {
             console.error(err);
             showMessage("CONNECTION LOST", "error");
             setLoadStatus("CONNECTION FAILED");
+            setFetchError(err.message || "Network Error");
         } finally {
             fetchLockRef.current = false;
             // Ensure timer is cleared if error occurred (can't reach timerId here easily without scope change, 
@@ -251,6 +255,15 @@ const Inventory = () => {
                 </div>
             </div>
 
+            {/* Error Message Display */}
+            {fetchError && (
+                <div style={{ textAlign: 'center', color: '#ff0000', padding: '20px', border: '2px dashed red', marginBottom: '20px' }}>
+                    <i className="nes-icon close is-small"></i> ERROR: {fetchError}
+                    <br />
+                    <button className="nes-btn is-primary" onClick={() => window.location.reload()} style={{ marginTop: '10px' }}>RETRY</button>
+                </div>
+            )}
+
             {initLoad ? (
                 <div style={{ textAlign: 'center', marginTop: '50px' }}>
                     <p>{loadStatus}</p>
@@ -295,6 +308,13 @@ const Inventory = () => {
                         }).map(item => (
                             <ItemCard key={item.partNumber} item={item} onAction={confirmAction} />
                         ))}
+
+                    {!initLoad && !fetchError && inventory.length === 0 && (
+                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: '#888' }}>
+                            <p>NO INVENTORY ITEMS FOUND</p>
+                            <p style={{ fontSize: '0.8rem' }}>Verify Google Sheet Content</p>
+                        </div>
+                    )}
                 </div>
             )}
 
