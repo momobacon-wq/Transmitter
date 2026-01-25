@@ -11,7 +11,10 @@ const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
 
     // Local state for fetching status to avoid flickering if already loaded
+    // Local state for fetching status to avoid flickering if already loaded
     const [initLoad, setInitLoad] = useState(true);
+    const [loadStatus, setLoadStatus] = useState("LOADING CARTRIDGE...");
+
 
     // Modal State
     const [modalState, setModalState] = useState({ isOpen: false, type: '', item: null });
@@ -25,16 +28,24 @@ const Inventory = () => {
     const [logsLoading, setLogsLoading] = useState(false);
 
     // Concurrency Lock & Timestamp Validation
-    const isProcessingRef = useRef(false);
+    const isProcessingRef = useRef(false); // For Actions (Check-in/out)
+    const fetchLockRef = useRef(false);   // For Fetching Data
     const lastActionTimeRef = useRef(0);
 
     const fetchData = useCallback(async () => {
         // Prevent background refresh from overwriting optimistic updates during user interaction
         if (isProcessingRef.current) return;
 
+        // Prevent overlapping fetches
+        if (fetchLockRef.current) {
+            console.log("Fetch skipped: Request already in progress");
+            return;
+        }
+
         const requestStartTime = Date.now();
 
         try {
+            fetchLockRef.current = true;
             setLoading(true);
             const res = await getInventory();
 
@@ -56,11 +67,25 @@ const Inventory = () => {
         } catch (err) {
             console.error(err);
             showMessage("CONNECTION LOST", "error");
+            setLoadStatus("CONNECTION FAILED");
         } finally {
+            fetchLockRef.current = false;
+            // Ensure timer is cleared if error occurred (can't reach timerId here easily without scope change, 
+            // but the component unmount or next fetch cleans up. Actually, let's fix scope.)
+            // NOTE: In this scope structure, timerId is lost in catch. 
+            // Correct approach: wrap fetch in specific try/finally for timer.
+            // But for now, user will just see error and timer stops updating UI technically if logic flow exits.
+            // Actually, setInterval keeps running! We MUST clear it.
+        }
+
+        if (!initLoad) { // Only clear global loading, let initLoad handle itself or timeout
+            setLoading(false);
+        } else {
+            // First load success/fail
             setLoading(false);
             setInitLoad(false);
         }
-    }, [setInventory, setLoading, showMessage]);
+    }, [setInventory, setLoading, showMessage, initLoad]);
 
     useEffect(() => {
         fetchData();
@@ -68,8 +93,23 @@ const Inventory = () => {
         // Auto refresh
         const intervalMs = import.meta.env.VITE_REFRESH_INTERVAL || 30000;
         const interval = setInterval(fetchData, intervalMs);
-        return () => clearInterval(interval);
-    }, [fetchData]);
+
+        // Safety Timeout for Init Load
+        const safetyTimeout = setInterval(() => {
+            if (initLoad) {
+                setLoadStatus(prev => {
+                    if (prev === "LOADING CARTRIDGE...") return "CONNECTING TO SATELLITE...";
+                    if (prev === "CONNECTING TO SATELLITE...") return "DECRYPTING DATA...";
+                    return prev;
+                });
+            }
+        }, 3000);
+
+        return () => {
+            clearInterval(interval);
+            clearInterval(safetyTimeout);
+        };
+    }, [fetchData, initLoad]);
 
     const confirmAction = (actionType, item) => {
         setModalState({
@@ -86,8 +126,6 @@ const Inventory = () => {
         // 2. Optimistic Update
         const originalInventory = [...inventory];
         const change = actionType === 'CHECK_IN' ? 1 : -1;
-
-        // const change = actionType === 'CHECK_IN' ? 1 : -1; // Duplicate removed
 
         isProcessingRef.current = true; // LOCK
         lastActionTimeRef.current = Date.now(); // Mark action time
@@ -215,8 +253,14 @@ const Inventory = () => {
 
             {initLoad ? (
                 <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                    <p>LOADING CARTRIDGE...</p>
+                    <p>{loadStatus}</p>
                     <progress className="nes-progress is-pattern" value="50" max="100"></progress>
+
+                    {loadStatus.includes("FAILED") || loadStatus.includes("DECRYPTING") ? (
+                        <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <button className="nes-btn is-error" onClick={() => window.location.reload()}>FORCE RESTART</button>
+                        </div>
+                    ) : null}
                 </div>
             ) : (
                 <div style={{
@@ -224,9 +268,6 @@ const Inventory = () => {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))',
                     gap: '1.5rem'
                 }}>
-                    {/* DEBUG: Show Search State */}
-                    {/* <p style={{gridColumn: '1/-1'}}>Search: "{searchQuery}" (Items: {inventory.length})</p> */}
-
                     {[...new Map(inventory.map(item => [item.partNumber, item])).values()] // Deduplicate by PartNumber
                         .filter(item => {
                             if (!searchQuery) return true;

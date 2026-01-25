@@ -14,8 +14,9 @@
  */
 
 function doGet(e) {
-    const lock = LockService.getScriptLock();
-    lock.tryLock(10000);
+    // Lock removed for READ operations to prevent bottlenecks
+    // const lock = LockService.getScriptLock();
+    // lock.tryLock(10000);
 
     try {
         const type = e.parameter.type || 'inventory';
@@ -50,30 +51,31 @@ function doGet(e) {
             })).setMimeType(ContentService.MimeType.JSON);
         }
 
+        // Check Cache first
+        const cache = CacheService.getScriptCache();
+        const cached = cache.get("inventory_data");
+        if (cached && type !== 'logs') {
+            return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
+        }
+
         const sheet = doc.getSheetByName("Inventory");
 
         // Get all data
         const data = sheet.getDataRange().getValues();
+        if (data.length < 2) {
+            return ContentService.createTextOutput(JSON.stringify({ status: "success", data: [] })).setMimeType(ContentService.MimeType.JSON);
+        }
+
         const headers = data[0];
         const rows = data.slice(1);
+        const inventory = rows.map(row => ({
+            partNumber: row[0], name: row[1], brand: row[2], spec: row[3], location: row[4], quantity: row[5]
+        }));
 
-        // Map data to JSON objects
-        // Expected Columns: [PartNumber, Name, Brand, Spec, Location, Quantity]
-        const inventory = rows.map(row => {
-            return {
-                partNumber: row[0],
-                name: row[1],
-                brand: row[2], // Brand
-                spec: row[3],
-                location: row[4],
-                quantity: row[5]
-            };
-        });
+        const jsonOutput = JSON.stringify({ status: "success", data: inventory });
+        cache.put("inventory_data", jsonOutput, 10); // Cache 10s
 
-        return ContentService.createTextOutput(JSON.stringify({
-            status: "success",
-            data: inventory
-        })).setMimeType(ContentService.MimeType.JSON);
+        return ContentService.createTextOutput(jsonOutput).setMimeType(ContentService.MimeType.JSON);
 
     } catch (error) {
         return ContentService.createTextOutput(JSON.stringify({
@@ -82,7 +84,7 @@ function doGet(e) {
         })).setMimeType(ContentService.MimeType.JSON);
 
     } finally {
-        lock.releaseLock();
+        // lock.releaseLock();
     }
 }
 

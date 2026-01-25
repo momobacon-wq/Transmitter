@@ -1,87 +1,77 @@
-import axios from 'axios';
+import { useGame } from '../context/GameContext'; // Not used here directly, but consistent imports
 
 const API_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
 
-// Mock Data State (In-memory for simulation)
-let mockInventory = [
-    { partNumber: 'MOCK-001', name: 'Flux Capacitor', brand: 'Dr. Brown Ent.', spec: '1.21 GW', location: 'A-01', quantity: 10, imageSeed: 'flux' },
-    { partNumber: 'MOCK-002', name: 'Fusion Cell', brand: 'Vault-Tec', spec: 'Mk I', location: 'B-02', quantity: 2, imageSeed: 'fusion' },
-    { partNumber: 'MOCK-003', name: 'Power Node', brand: 'CEC', spec: 'v5', location: 'C-03', quantity: 0, imageSeed: 'node' },
-    { partNumber: 'MOCK-004', name: 'Steam Valve', brand: 'Valve Corp', spec: 'Iron', location: 'D-04', quantity: 15, imageSeed: 'valve' },
-];
-
-// GAS Web Apps often behave better with fetch or axios without complex headers
-// sending as text/plain prevents preflight in some cases, but 'Anyone' access usually handles CORS.
-// We will send data as JSON string in body.
+/**
+ * Robust fetch wrapper with timeout
+ */
+const fetchWithTimeout = async (url, options = {}, timeout = 5000) => { // Timeout reduced to 5s
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        if (error.name === 'AbortError') {
+            throw new Error('Connection timed out (5s)');
+        }
+        throw error;
+    }
+};
 
 export const getInventory = async () => {
     if (!API_URL) {
-        console.warn("VITE_GOOGLE_SCRIPT_URL not set. Using Mock Data.");
-        return new Promise(resolve => setTimeout(() => resolve({
-            status: 'success',
-            data: [...mockInventory]
-        }), 800));
+        console.error("VITE_GOOGLE_SCRIPT_URL is not set!");
+        throw new Error("Configuration Error: API URL missing");
     }
 
     try {
-        // Add timestamp to prevent caching
-        const response = await axios.get(`${API_URL}?t=${new Date().getTime()}`);
-        return response.data;
+        console.log("Fetching Inventory from:", API_URL);
+        const response = await fetchWithTimeout(`${API_URL}?t=${new Date().getTime()}`);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error("Server returned invalid JSON");
+        }
     } catch (error) {
-        console.error("API Fetch Error", error);
+        console.error("API Fetch Failed:", error);
         throw error;
     }
 };
 
 export const updateStock = async (payload) => {
-    // payload: { action: 'CHECK_IN'|'CHECK_OUT', employeeId, partNumber, changeAmount }
-    if (!API_URL) {
-        console.log('Mock Update:', payload);
-        // Update local mock data
-        mockInventory = mockInventory.map(item => {
-            if (item.partNumber === payload.partNumber) {
-                return { ...item, quantity: item.quantity + payload.changeAmount };
-            }
-            return item;
-        });
-
-        const updatedItem = mockInventory.find(i => i.partNumber === payload.partNumber);
-
-        return new Promise(resolve => setTimeout(() => resolve({
-            status: 'success',
-            newQuantity: updatedItem ? updatedItem.quantity : 0
-        }), 500));
-    }
+    if (!API_URL) throw new Error("API URL missing");
 
     try {
-        // Send as POST. For GAS, we might need to send simple content.
-        // axios default Content-Type is application/json
-        const response = await axios.post(API_URL, JSON.stringify(payload), {
+        const response = await fetchWithTimeout(API_URL, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'text/plain;charset=utf-8'
-            }
+            },
+            body: JSON.stringify(payload)
         });
-        return response.data;
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        return data;
     } catch (error) {
-        console.error("API Update Error", error);
+        console.error("API Update Failed", error);
         throw error;
     }
 };
 
 export const addItem = async (newItemData) => {
-    // newItemData: { partNumber, name, spec, location, quantity }
-    if (!API_URL) {
-        console.log('Mock Add Item:', newItemData);
-        mockInventory.push({
-            ...newItemData,
-            imageSeed: newItemData.partNumber.toLowerCase()
-        });
-
-        return new Promise(resolve => setTimeout(() => resolve({
-            status: 'success',
-            message: 'Mock item created'
-        }), 500));
-    }
+    if (!API_URL) throw new Error("API URL missing");
 
     try {
         const payload = {
@@ -90,36 +80,27 @@ export const addItem = async (newItemData) => {
             newItemData: newItemData
         };
 
-        const response = await axios.post(API_URL, JSON.stringify(payload), {
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        const response = await fetchWithTimeout(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
         });
 
-        console.log("ADD_ITEM Response:", response.data); // DEBUG LOG
-
-        return response.data;
+        const data = await response.json();
+        return data;
     } catch (error) {
-        console.error("API Add Item Error", error);
-        if (error.response) console.error("Error Body:", error.response.data); // DEBUG LOG
+        console.error("API Add Item Error:", error);
         throw error;
     }
 };
 
 export const getLogs = async () => {
-    if (!API_URL) {
-        console.log('Mock Get Logs');
-        // Mock Logs
-        return new Promise(resolve => setTimeout(() => resolve({
-            status: 'success',
-            data: [
-                { timestamp: new Date(), employeeId: 'MOCK_USER', action: 'CHECK_IN', partNumber: 'MOCK-001', changeAmount: 5, balance: 15 },
-                { timestamp: new Date(Date.now() - 100000), employeeId: 'MOCK_USER', action: 'CHECK_OUT', partNumber: 'MOCK-002', changeAmount: -1, balance: 1 }
-            ]
-        }), 800));
-    }
+    if (!API_URL) throw new Error("API URL missing");
 
     try {
-        const response = await axios.get(`${API_URL}?type=logs&t=${new Date().getTime()}`);
-        return response.data;
+        const response = await fetchWithTimeout(`${API_URL}?type=logs&t=${new Date().getTime()}`);
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error("API Get Logs Error", error);
         throw error;
@@ -127,14 +108,12 @@ export const getLogs = async () => {
 };
 
 export const logLogin = async (employeeId) => {
-    if (!API_URL) return; // Mock mode ignore
-
+    if (!API_URL) return;
     try {
-        await axios.post(API_URL, JSON.stringify({
-            action: 'LOGIN',
-            employeeId: employeeId
-        }), {
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'LOGIN', employeeId: employeeId })
         });
     } catch (error) {
         console.error("Login Log Error", error);
