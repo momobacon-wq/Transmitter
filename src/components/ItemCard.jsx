@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 const ItemCard = ({ item, onAction }) => {
     const { partNumber, name, brand, spec, location, quantity } = item;
 
-    const lowStockThreshold = import.meta.env.VITE_LOW_STOCK_THRESHOLD || 5;
-    const isLowStock = quantity <= lowStockThreshold;
+    // defined as quantity <= 1 per user request
+    const isLowStock = quantity <= 1;
     // Card Border: Green (Normal) vs Red (Low Stock)
     // Always keep 'is-dark' to match theme, append 'is-error' for red border if needed
     const containerClass = `nes-container is-rounded is-dark ${isLowStock ? 'is-error' : ''}`;
