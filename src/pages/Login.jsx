@@ -28,7 +28,7 @@ const Login = () => {
             textAlign: 'center'
         }}>
             <div className="nes-container is-dark with-title is-centered">
-                <p className="title">物料管理系統</p>
+                <p className="title" style={{ fontSize: '1.5rem', marginTop: '-1rem' }}>物料管理系統</p>
 
                 <div style={{ marginBottom: '2rem' }}>
                     <i className="nes-icon coin is-large"></i>

@@ -46,18 +46,18 @@ const AddItemModal = ({ isOpen, onClose, onConfirm }) => {
                 <p className="title">新增物料</p>
 
                 <div className="nes-field" style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="partNumber" style={{ color: '#fff' }}>物料編號</label>
+                    <label htmlFor="partNumber" style={{ color: '#fff' }}>型號</label>
                     <input type="text" id="partNumber" name="partNumber" className="nes-input" value={formData.partNumber} onChange={handleChange} placeholder="例如: P-999" />
                 </div>
 
                 <div className="nes-field" style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="name" style={{ color: '#fff' }}>名稱</label>
+                    <label htmlFor="name" style={{ color: '#fff' }}>通訊</label>
                     <input type="text" id="name" name="name" className="nes-input" value={formData.name} onChange={handleChange} placeholder="例如: 超級引擎" />
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="nes-field" style={{ flex: 1 }}>
-                        <label htmlFor="spec" style={{ color: '#fff' }}>規格</label>
+                        <label htmlFor="spec" style={{ color: '#fff' }}>範圍</label>
                         <input type="text" id="spec" name="spec" className="nes-input" value={formData.spec} onChange={handleChange} />
                     </div>
                     <div className="nes-field" style={{ flex: 1 }}>

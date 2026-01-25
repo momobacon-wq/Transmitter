@@ -17,7 +17,7 @@ const ItemCard = ({ item, onAction }) => {
     return (
         <div className={containerClass} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column' }}>
             <p className="title" style={{ fontSize: '0.9rem', backgroundColor: '#212529', color: '#fff' }}>
-                <span style={{ fontSize: '1.2em', marginRight: '5px' }}>物料</span> {partNumber}
+                <span style={{ fontSize: '1.2em', marginRight: '5px' }}>型號</span> {partNumber}
             </p>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -27,18 +27,19 @@ const ItemCard = ({ item, onAction }) => {
 
                 <div style={{ flexGrow: 1 }}>
                     <div style={{ marginBottom: '0.4rem', fontSize: '1rem', color: '#fff', display: 'flex', alignItems: 'center' }}>
-                        <span style={{ marginRight: '8px', fontFamily: "'Press Start 2P', monospace" }}>名稱:</span>
+                        <span style={{ marginRight: '8px', fontFamily: "'Press Start 2P', monospace" }}>通訊:</span>
                         <span style={{ fontSize: '1rem', fontFamily: "'Press Start 2P', monospace" }}>{name}</span>
-                    </div>
-                    <div style={{ marginBottom: '0.4rem', fontSize: '1rem', color: '#fff', display: 'flex', alignItems: 'center' }}>
-                        <span style={{ marginRight: '8px', fontFamily: "'Press Start 2P', monospace" }}>規格:</span>
-                        <span style={{ fontSize: '1rem', fontFamily: "'Press Start 2P', monospace" }}>{spec}</span>
                     </div>
                     <div style={{ marginBottom: '0.4rem', fontSize: '1rem', color: '#fff', display: 'flex', alignItems: 'center' }}>
                         <span style={{ marginRight: '8px', fontFamily: "'Press Start 2P', monospace" }}>位置:</span>
                         <span style={{ fontSize: '1rem', fontFamily: "'Press Start 2P', monospace" }}>{location}</span>
                     </div>
                 </div>
+            </div>
+
+            <div style={{ marginTop: '0.8rem', padding: '10px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', display: 'flex', alignItems: 'baseline' }}>
+                <div style={{ fontSize: '1rem', color: '#fff', marginRight: '8px', fontFamily: "'Press Start 2P', monospace", whiteSpace: 'nowrap' }}>範圍:</div>
+                <div style={{ fontSize: '0.9rem', color: '#fff', fontFamily: "'Press Start 2P', monospace", lineHeight: '1.5', wordBreak: 'break-all' }}>{spec}</div>
             </div>
 
             <div style={{ marginTop: '1rem', borderTop: '2px dashed #fff', paddingTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
