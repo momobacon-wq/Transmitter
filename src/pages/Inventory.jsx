@@ -18,7 +18,9 @@ const Inventory = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
     const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+
     const [sortConfig, setSortConfig] = useState({ field: 'partNumber', direction: 'asc' });
+    const [searchQuery, setSearchQuery] = useState('');
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
 
@@ -197,6 +199,20 @@ const Inventory = () => {
                 </div>
             </header>
 
+            <div style={{ marginBottom: '20px' }}>
+                <div className="nes-field">
+                    <label htmlFor="search_field" style={{ color: '#fff' }}>Search Inventory:</label>
+                    <input
+                        type="text"
+                        id="search_field"
+                        className="nes-input is-dark"
+                        placeholder="Type to filter..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
+
             {initLoad ? (
                 <div style={{ textAlign: 'center', marginTop: '50px' }}>
                     <p>LOADING CARTRIDGE...</p>
@@ -208,7 +224,16 @@ const Inventory = () => {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                     gap: '1.5rem'
                 }}>
-                    {[...inventory].sort((a, b) => {
+                    {[...inventory].filter(item => {
+                        if (!searchQuery) return true;
+                        const lowerQuery = searchQuery.toLowerCase();
+                        return (
+                            String(item.partNumber).toLowerCase().includes(lowerQuery) ||
+                            String(item.name).toLowerCase().includes(lowerQuery) ||
+                            String(item.spec).toLowerCase().includes(lowerQuery) ||
+                            String(item.location).toLowerCase().includes(lowerQuery)
+                        );
+                    }).sort((a, b) => {
                         let comparison = 0;
                         if (sortConfig.field === 'quantity') {
                             comparison = a.quantity - b.quantity;
