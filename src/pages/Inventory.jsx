@@ -10,7 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
-    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover } = useSound();
+    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playUIClose, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
