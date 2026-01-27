@@ -65,11 +65,11 @@ const Inventory = () => {
             if (res.status === 'success') {
                 setInventory(res.data);
 
-                // Sound Pack v3: Low Stock Alarm
-                const lowStockItems = res.data.filter(i => i.quantity <= 5);
-                if (lowStockItems.length > 0 && (initLoad || !isProcessingRef.current)) {
-                    playRetroAlarm();
-                }
+                // Sound Pack v3: Low Stock Alarm (Disabled by user request)
+                // const lowStockItems = res.data.filter(i => i.quantity <= 5);
+                // if (lowStockItems.length > 0 && (initLoad || !isProcessingRef.current)) {
+                //    playRetroAlarm();
+                // }
 
                 setFetchError(null);
             } else {
