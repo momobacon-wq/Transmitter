@@ -129,59 +129,7 @@ const Inventory = () => {
         };
     }, [fetchData, initLoad]);
 
-    // --- Keyboard Shortcuts ---
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Ignore if typing in an input (except for Escape)
-            if (e.target.tagName === 'INPUT' && e.key !== 'Escape') return;
 
-            // Search: '/' or 'Control+k'
-            if (e.key === '/' || (e.ctrlKey && e.key === 'k')) {
-                e.preventDefault();
-                playClick();
-                searchInputRef.current?.focus();
-            }
-
-            // New Item: 'Alt+n'
-            if (e.altKey && e.key === 'n') {
-                e.preventDefault();
-                playClick();
-                setIsAddModalOpen(prev => !prev);
-            }
-
-            // Logs: 'Alt+l'
-            if (e.altKey && e.key === 'l') {
-                e.preventDefault();
-                playClick();
-                handleOpenLogs();
-            }
-
-            // Sort: 'Alt+s'
-            if (e.altKey && e.key === 's') {
-                e.preventDefault();
-                playClick();
-                setIsSortModalOpen(prev => !prev);
-            }
-
-            // Close Modals: 'Escape'
-            if (e.key === 'Escape') {
-                if (isAddModalOpen || isSortModalOpen || isLogsModalOpen || modalState.isOpen) {
-                    playUIClose();
-                    setIsAddModalOpen(false);
-                    setIsSortModalOpen(false);
-                    setIsLogsModalOpen(false);
-                    setModalState(prev => ({ ...prev, isOpen: false }));
-                    // Lose focus from input if pressed escape
-                    if (document.activeElement.tagName === 'INPUT') {
-                        document.activeElement.blur();
-                    }
-                }
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [playClick, playUIClose, isAddModalOpen, isSortModalOpen, isLogsModalOpen, modalState.isOpen, handleOpenLogs]);
 
     const confirmAction = (actionType, item) => {
         if (actionType === 'CHECK_OUT') {
@@ -315,6 +263,48 @@ const Inventory = () => {
         setSortConfig({ field, direction });
         setIsSortModalOpen(false);
     };
+
+    // --- Keyboard Shortcuts (Moved to end to ensure handlers are defined) ---
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.target.tagName === 'INPUT' && e.key !== 'Escape') return;
+
+            if (e.key === '/' || (e.ctrlKey && e.key === 'k')) {
+                e.preventDefault();
+                playClick();
+                searchInputRef.current?.focus();
+            }
+            if (e.altKey && e.key === 'n') {
+                e.preventDefault();
+                playClick();
+                setIsAddModalOpen(prev => !prev);
+            }
+            if (e.altKey && e.key === 'l') {
+                e.preventDefault();
+                playClick();
+                handleOpenLogs();
+            }
+            if (e.altKey && e.key === 's') {
+                e.preventDefault();
+                playClick();
+                setIsSortModalOpen(prev => !prev);
+            }
+            if (e.key === 'Escape') {
+                if (isAddModalOpen || isSortModalOpen || isLogsModalOpen || modalState.isOpen) {
+                    playUIClose();
+                    setIsAddModalOpen(false);
+                    setIsSortModalOpen(false);
+                    setIsLogsModalOpen(false);
+                    setModalState(prev => ({ ...prev, isOpen: false }));
+                    if (document.activeElement.tagName === 'INPUT') {
+                        document.activeElement.blur();
+                    }
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [playClick, playUIClose, isAddModalOpen, isSortModalOpen, isLogsModalOpen, modalState.isOpen, handleOpenLogs]);
 
     return (
         <div>
