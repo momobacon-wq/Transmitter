@@ -29,11 +29,13 @@ const Inventory = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
+    const [lastRefresh, setLastRefresh] = useState(Date.now());
 
     // Concurrency Lock & Timestamp Validation
     const isProcessingRef = useRef(false); // For Actions (Check-in/out)
     const fetchLockRef = useRef(false);   // For Fetching Data
     const lastActionTimeRef = useRef(0);
+    const searchInputRef = useRef(null); // Ref for search focus
 
     const fetchData = useCallback(async () => {
         // Prevent background refresh from overwriting optimistic updates during user interaction
@@ -64,6 +66,7 @@ const Inventory = () => {
 
             if (res.status === 'success') {
                 setInventory(res.data);
+                setLastRefresh(Date.now()); // Update last refresh time
 
                 // Sound Pack v3: Low Stock Alarm (Disabled by user request)
                 // const lowStockItems = res.data.filter(i => i.quantity <= 5);
@@ -100,7 +103,7 @@ const Inventory = () => {
             setLoading(false);
             setInitLoad(false);
         }
-    }, [setInventory, setLoading, showMessage, initLoad]);
+    }, [setInventory, setLoading, showMessage, initLoad, playDataLoad, playPowerDown]);
 
     useEffect(() => {
         fetchData();
@@ -125,6 +128,60 @@ const Inventory = () => {
             clearInterval(safetyTimeout);
         };
     }, [fetchData, initLoad]);
+
+    // --- Keyboard Shortcuts ---
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ignore if typing in an input (except for Escape)
+            if (e.target.tagName === 'INPUT' && e.key !== 'Escape') return;
+
+            // Search: '/' or 'Control+k'
+            if (e.key === '/' || (e.ctrlKey && e.key === 'k')) {
+                e.preventDefault();
+                playClick();
+                searchInputRef.current?.focus();
+            }
+
+            // New Item: 'Alt+n'
+            if (e.altKey && e.key === 'n') {
+                e.preventDefault();
+                playClick();
+                setIsAddModalOpen(prev => !prev);
+            }
+
+            // Logs: 'Alt+l'
+            if (e.altKey && e.key === 'l') {
+                e.preventDefault();
+                playClick();
+                handleOpenLogs();
+            }
+
+            // Sort: 'Alt+s'
+            if (e.altKey && e.key === 's') {
+                e.preventDefault();
+                playClick();
+                setIsSortModalOpen(prev => !prev);
+            }
+
+            // Close Modals: 'Escape'
+            if (e.key === 'Escape') {
+                if (isAddModalOpen || isSortModalOpen || isLogsModalOpen || modalState.isOpen) {
+                    playUIClose();
+                    setIsAddModalOpen(false);
+                    setIsSortModalOpen(false);
+                    setIsLogsModalOpen(false);
+                    setModalState(prev => ({ ...prev, isOpen: false }));
+                    // Lose focus from input if pressed escape
+                    if (document.activeElement.tagName === 'INPUT') {
+                        document.activeElement.blur();
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [playClick, playUIClose, isAddModalOpen, isSortModalOpen, isLogsModalOpen, modalState.isOpen, handleOpenLogs]);
 
     const confirmAction = (actionType, item) => {
         if (actionType === 'CHECK_OUT') {
@@ -275,13 +332,14 @@ const Inventory = () => {
             </header>
 
             <div style={{ marginBottom: '20px' }}>
-                <div className="nes-field">
-                    <label htmlFor="search_field" style={{ color: '#fff' }}>Search Inventory:</label>
+                <div className="nes-field is-inline" style={{ marginBottom: '20px' }}>
+                    <label htmlFor="search_field" style={{ color: '#fff' }}>SEARCH</label>
                     <input
                         type="text"
                         id="search_field"
+                        ref={searchInputRef}
                         className="nes-input is-dark"
-                        placeholder="Type to filter..."
+                        placeholder="Find part #... (/)"
                         value={searchQuery}
                         onChange={(e) => {
                             playKeystroke();
