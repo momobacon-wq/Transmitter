@@ -186,6 +186,165 @@ export const SoundProvider = ({ children }) => {
         osc.stop(now + 0.3);
     };
 
+    // --- Sound Pack v2 ---
+
+    // White Noise Buffer Generator
+    const createNoiseBuffer = (ctx) => {
+        const bufferSize = ctx.sampleRate * 2; // 2 seconds
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        return buffer;
+    };
+
+    const noiseBufferRef = useRef(null);
+
+    const playKeystroke = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+
+        // Init noise buffer if needed
+        if (!noiseBufferRef.current) {
+            noiseBufferRef.current = createNoiseBuffer(ctx);
+        }
+
+        const now = ctx.currentTime;
+
+        // Short burst of high-passed noise for "Click"
+        const source = ctx.createBufferSource();
+        source.buffer = noiseBufferRef.current;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 1000;
+
+        const gain = ctx.createGain();
+        // Variety: Random volume
+        gain.gain.setValueAtTime(0.05 + Math.random() * 0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        // Random start position in noise buffer
+        source.start(now, Math.random() * 1, 0.05);
+
+        // Add a tiny tonal "thock"
+        const osc = ctx.createOscillator();
+        const oscGain = ctx.createGain();
+        osc.frequency.value = 200 + Math.random() * 50;
+        osc.type = 'triangle';
+        oscGain.gain.setValueAtTime(0.05, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(oscGain);
+        oscGain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+    };
+
+    const playUIOpen = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Rising sweep
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    };
+
+    const playUIClose = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Falling sweep
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    };
+
+    const playDataLoad = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+
+        // Init noise buffer if needed
+        if (!noiseBufferRef.current) {
+            noiseBufferRef.current = createNoiseBuffer(ctx);
+        }
+
+        const now = ctx.currentTime;
+
+        // Data crunching sound: Random short beeps + low static
+        const duration = 0.5;
+
+        // Static background
+        const noiseSrc = ctx.createBufferSource();
+        noiseSrc.buffer = noiseBufferRef.current;
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = 500;
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.value = 0.05;
+
+        noiseSrc.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noiseSrc.start(now);
+        noiseSrc.stop(now + duration);
+
+        // Random beeps (Modem like)
+        for (let i = 0; i < 5; i++) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.className = 'square';
+            osc.frequency.value = 1000 + Math.random() * 2000;
+
+            const time = now + Math.random() * duration;
+            const beepDur = 0.05;
+
+            gain.gain.setValueAtTime(0.05, time);
+            gain.gain.linearRampToValueAtTime(0, time + beepDur);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(time);
+            osc.stop(time + beepDur);
+        }
+    };
+
     const toggleMute = () => setMuted(prev => !prev);
 
     return (
@@ -197,6 +356,10 @@ export const SoundProvider = ({ children }) => {
             playBootup,
             playZap,
             playWarning,
+            playKeystroke,
+            playUIOpen,
+            playUIClose,
+            playDataLoad,
             muted,
             toggleMute
         }}>

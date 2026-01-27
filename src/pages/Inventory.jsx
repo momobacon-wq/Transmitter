@@ -10,7 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
-    const { playClick, playSuccess, playError, playZap, playWarning } = useSound();
+    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
@@ -49,6 +49,7 @@ const Inventory = () => {
 
         try {
             fetchLockRef.current = true;
+            if (initLoad) playDataLoad();
             setLoading(true);
             const res = await getInventory();
 
@@ -123,6 +124,7 @@ const Inventory = () => {
         } else {
             playClick();
         }
+        playUIOpen();
         setModalState({
             isOpen: true,
             type: actionType,
@@ -260,7 +262,10 @@ const Inventory = () => {
                         className="nes-input is-dark"
                         placeholder="Type to filter..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            playKeystroke();
+                            setSearchQuery(e.target.value);
+                        }}
                     />
                 </div>
             </div>

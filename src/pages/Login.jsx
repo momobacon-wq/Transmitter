@@ -9,7 +9,7 @@ import { useSound } from '../context/SoundContext';
 const Login = () => {
     const [inputVal, setInputVal] = useState('');
     const { login } = useGame();
-    const { playBootup, playClick } = useSound();
+    const { playBootup, playClick, playKeystroke } = useSound();
     const navigate = useNavigate();
 
     const handleStart = (e) => {
@@ -49,7 +49,10 @@ const Login = () => {
                             className="nes-input"
                             placeholder="請輸入..."
                             value={inputVal}
-                            onChange={(e) => setInputVal(e.target.value)}
+                            onChange={(e) => {
+                                playKeystroke();
+                                setInputVal(e.target.value);
+                            }}
                             autoFocus
                         />
                     </div>
