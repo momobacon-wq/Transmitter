@@ -10,7 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
-    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playRetroAlarm, playPowerDown } = useSound();
+    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
@@ -130,7 +130,7 @@ const Inventory = () => {
         if (actionType === 'CHECK_OUT') {
             playWarning();
         } else {
-            playClick();
+            playCheckIn(); // Use CheckIn sound as generic "Select" or "Power Up" context
         }
         playUIOpen();
         setModalState({
@@ -180,8 +180,15 @@ const Inventory = () => {
                         return invItem;
                     }));
                 }
-                showMessage(actionType === 'CHECK_IN' ? 'ACQUIRED!' : 'USED!', 'success');
-                playSuccess();
+                if (actionType === 'CHECK_IN') {
+                    showMessage('ACQUIRED!', 'success');
+                    playCheckIn();
+                    speak("Access Granted");
+                } else {
+                    showMessage('USED!', 'success');
+                    playCheckOut();
+                    speak("Discharge Complete");
+                }
             } else {
                 throw new Error(res.message);
             }
@@ -211,6 +218,7 @@ const Inventory = () => {
             if (res.status === 'success') {
                 showMessage("ITEM CREATED!", "success");
                 playSuccess();
+                speak("New Item Initialized");
                 fetchData(); // Refresh list
             } else {
                 throw new Error(res.message);
@@ -254,10 +262,10 @@ const Inventory = () => {
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="nes-btn is-warning" onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
-                    <button className="nes-btn is-primary" onClick={() => { playClick(); handleOpenLogs(); }} style={{ fontSize: '0.7rem' }}>LOGS</button>
-                    <button className="nes-btn is-success" onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
-                    <button className="nes-btn is-error" onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
+                    <button className="nes-btn is-warning" onMouseEnter={playHover} onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
+                    <button className="nes-btn is-primary" onMouseEnter={playHover} onClick={() => { playClick(); handleOpenLogs(); }} style={{ fontSize: '0.7rem' }}>LOGS</button>
+                    <button className="nes-btn is-success" onMouseEnter={playHover} onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
+                    <button className="nes-btn is-error" onMouseEnter={playHover} onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
                 </div>
             </header>
 

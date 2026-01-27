@@ -432,7 +432,85 @@ export const SoundProvider = ({ children }) => {
         osc.stop(now + 1.0);
     };
 
-    const toggleMute = () => setMuted(prev => !prev);
+    // --- Sound Pack v4 ---
+
+    const speak = (text) => {
+        if (muted) return;
+        if (!window.speechSynthesis) return;
+
+        // Cancel previous speech to allow rapid updates
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.pitch = 0.5; // Low pitch (Robot)
+        utterance.volume = 0.8;
+
+        // Try to find a good English voice
+        const voices = window.speechSynthesis.getVoices();
+        const robotVoice = voices.find(v => v.name.includes("Google US English")) || voices[0];
+        if (robotVoice) utterance.voice = robotVoice;
+
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const playCheckIn = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Power Up (Rising Arpeggio fast)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+
+        // Fast glissando up
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+    };
+
+    const playCheckOut = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Discharge (Falling noise/tone)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+
+        // Fast glissando down
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    };
+
+    const toggleMute = () => {
+        setMuted(prev => {
+            const next = !prev;
+            if (next) window.speechSynthesis.cancel();
+            return next;
+        });
+    };
 
     return (
         <SoundContext.Provider value={{
@@ -450,6 +528,9 @@ export const SoundProvider = ({ children }) => {
             playSort,
             playRetroAlarm,
             playPowerDown,
+            speak,
+            playCheckIn,
+            playCheckOut,
             muted,
             toggleMute
         }}>

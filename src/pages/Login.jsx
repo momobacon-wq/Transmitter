@@ -9,7 +9,7 @@ import { useSound } from '../context/SoundContext';
 const Login = () => {
     const [inputVal, setInputVal] = useState('');
     const { login } = useGame();
-    const { playBootup, playClick, playKeystroke } = useSound();
+    const { playBootup, playClick, playKeystroke, speak } = useSound();
     const navigate = useNavigate();
 
     const handleStart = (e) => {
@@ -17,6 +17,7 @@ const Login = () => {
         if (!inputVal.trim()) return;
 
         playBootup(); // Gameboy boot sound!
+        speak("Welcome User");
         logLogin(inputVal); // Log the login event
         login(inputVal);
         navigate('/inventory');
