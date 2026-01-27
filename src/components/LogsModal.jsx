@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
+import { useSound } from '../context/SoundContext';
 
 const LogsModal = ({ isOpen, onClose, logs, loading }) => {
+    const { playClick } = useSound();
     if (!isOpen) return null;
 
     return (
@@ -28,7 +30,7 @@ const LogsModal = ({ isOpen, onClose, logs, loading }) => {
             }}>
                 <button
                     className="nes-btn is-error"
-                    onClick={onClose}
+                    onClick={() => { playClick(); onClose(); }}
                     style={{
                         position: 'absolute',
                         top: '15px',

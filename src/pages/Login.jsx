@@ -4,15 +4,19 @@ import { useGame } from '../context/GameContext';
 
 import { logLogin } from '../services/api';
 
+import { useSound } from '../context/SoundContext';
+
 const Login = () => {
     const [inputVal, setInputVal] = useState('');
     const { login } = useGame();
+    const { playSuccess, playClick } = useSound();
     const navigate = useNavigate();
 
     const handleStart = (e) => {
         e.preventDefault();
         if (!inputVal.trim()) return;
 
+        playSuccess(); // Coin sound on start!
         logLogin(inputVal); // Log the login event
         login(inputVal);
         navigate('/inventory');

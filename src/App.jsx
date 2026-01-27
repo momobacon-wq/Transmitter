@@ -35,12 +35,16 @@ function AppContent() {
     );
 }
 
+import { SoundProvider } from './context/SoundContext';
+
 function App() {
     return (
         <GameProvider>
-            <Router>
-                <AppContent />
-            </Router>
+            <SoundProvider>
+                <Router>
+                    <AppContent />
+                </Router>
+            </SoundProvider>
         </GameProvider>
     );
 }

@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
+import { useSound } from '../context/SoundContext';
 
 const SortModal = ({ isOpen, onClose, onSort, currentSort }) => {
+    const { playClick } = useSound();
     if (!isOpen) return null;
 
     return (
@@ -19,7 +21,7 @@ const SortModal = ({ isOpen, onClose, onSort, currentSort }) => {
             <div className="nes-dialog is-dark is-rounded" style={{ backgroundColor: '#212529', minWidth: '320px', padding: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <p className="title" style={{ margin: 0 }}>排序設定</p>
-                    <button className="nes-btn is-error" onClick={onClose} style={{ padding: '0 8px', fontSize: '0.8rem' }}>X</button>
+                    <button className="nes-btn is-error" onClick={() => { playClick(); onClose(); }} style={{ padding: '0 8px', fontSize: '0.8rem' }}>X</button>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -28,12 +30,12 @@ const SortModal = ({ isOpen, onClose, onSort, currentSort }) => {
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button
                                 className={`nes-btn ${currentSort.field === 'quantity' && currentSort.direction === 'desc' ? 'is-primary' : ''}`}
-                                onClick={() => onSort('quantity', 'desc')}
+                                onClick={() => { playClick(); onSort('quantity', 'desc'); }}
                                 style={{ fontSize: '0.7rem', flex: 1 }}
                             >大 → 小</button>
                             <button
                                 className={`nes-btn ${currentSort.field === 'quantity' && currentSort.direction === 'asc' ? 'is-primary' : ''}`}
-                                onClick={() => onSort('quantity', 'asc')}
+                                onClick={() => { playClick(); onSort('quantity', 'asc'); }}
                                 style={{ fontSize: '0.7rem', flex: 1 }}
                             >小 → 大</button>
                         </div>
@@ -44,12 +46,12 @@ const SortModal = ({ isOpen, onClose, onSort, currentSort }) => {
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button
                                 className={`nes-btn ${currentSort.field === 'partNumber' && currentSort.direction === 'desc' ? 'is-primary' : ''}`}
-                                onClick={() => onSort('partNumber', 'desc')}
+                                onClick={() => { playClick(); onSort('partNumber', 'desc'); }}
                                 style={{ fontSize: '0.7rem', flex: 1 }}
                             >大 → 小</button>
                             <button
                                 className={`nes-btn ${currentSort.field === 'partNumber' && currentSort.direction === 'asc' ? 'is-primary' : ''}`}
-                                onClick={() => onSort('partNumber', 'asc')}
+                                onClick={() => { playClick(); onSort('partNumber', 'asc'); }}
                                 style={{ fontSize: '0.7rem', flex: 1 }}
                             >小 → 大</button>
                         </div>
@@ -60,12 +62,12 @@ const SortModal = ({ isOpen, onClose, onSort, currentSort }) => {
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button
                                 className={`nes-btn ${currentSort.field === 'brand' && currentSort.direction === 'desc' ? 'is-primary' : ''}`}
-                                onClick={() => onSort('brand', 'desc')}
+                                onClick={() => { playClick(); onSort('brand', 'desc'); }}
                                 style={{ fontSize: '0.7rem', flex: 1 }}
                             >Z → A</button>
                             <button
                                 className={`nes-btn ${currentSort.field === 'brand' && currentSort.direction === 'asc' ? 'is-primary' : ''}`}
-                                onClick={() => onSort('brand', 'asc')}
+                                onClick={() => { playClick(); onSort('brand', 'asc'); }}
                                 style={{ fontSize: '0.7rem', flex: 1 }}
                             >A → Z</button>
                         </div>

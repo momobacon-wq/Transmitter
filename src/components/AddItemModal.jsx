@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useSound } from '../context/SoundContext';
 
 const AddItemModal = ({ isOpen, onClose, onConfirm }) => {
+    const { playClick } = useSound();
     const [formData, setFormData] = useState({
         partNumber: '',
         name: '',
@@ -78,8 +80,8 @@ const AddItemModal = ({ isOpen, onClose, onConfirm }) => {
                 </div>
 
                 <menu className="dialog-menu" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                    <button className="nes-btn" onClick={onClose}>取消</button>
-                    <button className="nes-btn is-success" onClick={handleSubmit}>建立</button>
+                    <button className="nes-btn" onClick={() => { playClick(); onClose(); }}>取消</button>
+                    <button className="nes-btn is-success" onClick={() => { playClick(); handleSubmit(); }}>建立</button>
                 </menu>
             </div>
         </div>

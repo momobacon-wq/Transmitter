@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
+import { useSound } from '../context/SoundContext';
 import { getInventory, updateStock, addItem, getLogs } from '../services/api';
 import ItemCard from '../components/ItemCard';
 import Modal from '../components/Modal';
@@ -9,6 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
+    const { playClick, playSuccess, playError } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
@@ -116,6 +118,7 @@ const Inventory = () => {
     }, [fetchData, initLoad]);
 
     const confirmAction = (actionType, item) => {
+        playClick();
         setModalState({
             isOpen: true,
             type: actionType,
@@ -164,6 +167,7 @@ const Inventory = () => {
                     }));
                 }
                 showMessage(actionType === 'CHECK_IN' ? 'ACQUIRED!' : 'USED!', 'success');
+                playSuccess();
             } else {
                 throw new Error(res.message);
             }
@@ -171,6 +175,7 @@ const Inventory = () => {
         } catch (err) {
             console.error(err);
             showMessage("TRANSACTION FAILED", "error");
+            playError();
             // Revert
             setInventory(originalInventory);
         } finally {
@@ -191,6 +196,7 @@ const Inventory = () => {
             const res = await addItem(newItemData);
             if (res.status === 'success') {
                 showMessage("ITEM CREATED!", "success");
+                playSuccess();
                 fetchData(); // Refresh list
             } else {
                 throw new Error(res.message);
@@ -234,9 +240,9 @@ const Inventory = () => {
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="nes-btn is-warning" onClick={() => setIsSortModalOpen(true)} style={{ fontSize: '0.7rem' }}>SORT</button>
-                    <button className="nes-btn is-primary" onClick={handleOpenLogs} style={{ fontSize: '0.7rem' }}>LOGS</button>
-                    <button className="nes-btn is-success" onClick={() => setIsAddModalOpen(true)} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
+                    <button className="nes-btn is-warning" onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
+                    <button className="nes-btn is-primary" onClick={() => { playClick(); handleOpenLogs(); }} style={{ fontSize: '0.7rem' }}>LOGS</button>
+                    <button className="nes-btn is-success" onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
                     <button className="nes-btn is-error" onClick={logout} style={{ fontSize: '0.7rem' }}>EXIT</button>
                 </div>
             </header>
