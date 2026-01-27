@@ -345,6 +345,93 @@ export const SoundProvider = ({ children }) => {
         }
     };
 
+    // --- Sound Pack v3 ---
+
+    const playSort = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Rapid rising bubbling sound
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(200, now);
+
+        // Step up quickly
+        osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+        osc.frequency.linearRampToValueAtTime(300, now + 0.2);
+        osc.frequency.linearRampToValueAtTime(800, now + 0.3);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    };
+
+    const playRetroAlarm = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // LFO Siren (Square wave modulating frequency)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.value = 600; // Base freq
+
+        lfo.type = 'square';
+        lfo.frequency.value = 8; // 8 Hz modulation
+        lfoGain.gain.value = 200; // Modulate by +/- 200Hz
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.linearRampToValueAtTime(0, now + 1.0); // 1 second alarm
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        lfo.start(now);
+        osc.stop(now + 1.0);
+        lfo.stop(now + 1.0);
+    };
+
+    const playPowerDown = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Deep slow drop
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0, now + 1.0);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.0);
+    };
+
     const toggleMute = () => setMuted(prev => !prev);
 
     return (
@@ -360,6 +447,9 @@ export const SoundProvider = ({ children }) => {
             playUIOpen,
             playUIClose,
             playDataLoad,
+            playSort,
+            playRetroAlarm,
+            playPowerDown,
             muted,
             toggleMute
         }}>

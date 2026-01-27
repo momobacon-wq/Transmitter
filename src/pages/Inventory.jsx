@@ -10,7 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
-    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen } = useSound();
+    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playRetroAlarm, playPowerDown } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
@@ -64,6 +64,13 @@ const Inventory = () => {
 
             if (res.status === 'success') {
                 setInventory(res.data);
+
+                // Sound Pack v3: Low Stock Alarm
+                const lowStockItems = res.data.filter(i => i.quantity <= 5);
+                if (lowStockItems.length > 0 && (initLoad || !isProcessingRef.current)) {
+                    playRetroAlarm();
+                }
+
                 setFetchError(null);
             } else {
                 console.error("Error fetching", res);
@@ -72,6 +79,7 @@ const Inventory = () => {
             }
         } catch (err) {
             console.error(err);
+            playPowerDown(); // Sound Pack v3: Critical Error Sound
             showMessage("CONNECTION LOST", "error");
             setLoadStatus("CONNECTION FAILED");
             setFetchError(err.message || "Network Error");
