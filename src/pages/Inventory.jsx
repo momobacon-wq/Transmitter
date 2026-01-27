@@ -284,16 +284,26 @@ const Inventory = () => {
                     {[...new Map(inventory.map(item => [item.partNumber, item])).values()] // Deduplicate by PartNumber
                         .filter(item => {
                             if (!searchQuery) return true;
-                            const lowerQuery = searchQuery.toLowerCase().trim();
-                            if (!lowerQuery) return true;
 
-                            return (
-                                String(item.partNumber || '').toLowerCase().includes(lowerQuery) ||
-                                String(item.name || '').toLowerCase().includes(lowerQuery) ||
-                                String(item.brand || '').toLowerCase().includes(lowerQuery) ||
-                                String(item.spec || '').toLowerCase().includes(lowerQuery) ||
-                                String(item.location || '').toLowerCase().includes(lowerQuery)
-                            );
+                            // Split by comma (OR logic) for batch search
+                            const distinctQueries = searchQuery.toLowerCase().split(/[,，]/);
+
+                            // Return true if ANY of the distinct queries match (OR)
+                            return distinctQueries.some(query => {
+                                const terms = query.trim().split(/\s+/); // Split by space (AND logic)
+                                if (terms.length === 0 || (terms.length === 1 && terms[0] === '')) return false;
+
+                                // Return true if ALL terms match (AND)
+                                return terms.every(term => {
+                                    return (
+                                        String(item.partNumber || '').toLowerCase().includes(term) ||
+                                        String(item.name || '').toLowerCase().includes(term) ||
+                                        String(item.brand || '').toLowerCase().includes(term) ||
+                                        String(item.spec || '').toLowerCase().includes(term) ||
+                                        String(item.location || '').toLowerCase().includes(term)
+                                    );
+                                });
+                            });
                         }).sort((a, b) => {
                             let comparison = 0;
                             if (sortConfig.field === 'quantity') {
