@@ -173,13 +173,18 @@ const Inventory = () => {
             if (res.status === 'success') {
                 // If server returns new qty, sync it
                 if (res.newQuantity !== undefined) {
+                    const serverQty = parseInt(res.newQuantity, 10);
                     setInventory(prev => prev.map(invItem => {
                         if (invItem.partNumber === item.partNumber) {
-                            return { ...invItem, quantity: res.newQuantity };
+                            return { ...invItem, quantity: serverQty };
                         }
                         return invItem;
                     }));
                 }
+
+                // Update timestamp to invalidate any stale fetches that started during this transaction
+                lastActionTimeRef.current = Date.now();
+
                 if (actionType === 'CHECK_IN') {
                     showMessage('ACQUIRED!', 'success');
                     playCheckIn();
@@ -203,7 +208,7 @@ const Inventory = () => {
             // Wait a moment before allowing refresh again to ensure no race condition with polling
             setTimeout(() => {
                 isProcessingRef.current = false; // UNLOCK
-            }, 1000);
+            }, 2000); // Increased lock time to allow Google Sheet cache to catch up
         }
     };
 
