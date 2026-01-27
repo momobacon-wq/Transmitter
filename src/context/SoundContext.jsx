@@ -42,8 +42,91 @@ export const SoundProvider = ({ children }) => {
     };
 
     // 8-bit Sound Presets
-    const playClick = () => playTone(800, 'square', 0.05, 0.05); // Short high blip
-    const playHover = () => playTone(600, 'triangle', 0.02, 0.02); // Very short soft blip
+
+    // Randomized click for variety
+    const playClick = () => {
+        if (muted) return;
+        // Random pitch between 750 and 850
+        const freq = 750 + Math.random() * 100;
+        playTone(freq, 'square', 0.05, 0.05);
+    };
+
+    const playHover = () => playTone(600, 'triangle', 0.02, 0.02);
+
+    // GAMEBOY STYLE BOOTUP
+    const playBootup = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Arpeggio: C4 - E4 - G4 - C5 (Ping!)
+        const notes = [261.63, 329.63, 392.00, 523.25];
+
+        notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, now + i * 0.1);
+
+            gain.gain.setValueAtTime(0.05, now + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.1);
+            osc.stop(now + i * 0.1 + 0.3);
+        });
+    };
+
+    // ZAP / LASER (for Delete/Logout)
+    const playZap = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+
+        // Fast pitch drop
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+    };
+
+    // WARNING (Low double tone)
+    const playWarning = () => {
+        if (muted) return;
+        initAudio();
+        const ctx = audioCtxRef.current;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Two low square waves detuned
+        [150, 155].forEach(freq => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        });
+    };
 
     const playSuccess = () => {
         if (muted) return;
@@ -111,6 +194,9 @@ export const SoundProvider = ({ children }) => {
             playHover,
             playSuccess,
             playError,
+            playBootup,
+            playZap,
+            playWarning,
             muted,
             toggleMute
         }}>

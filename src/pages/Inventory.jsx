@@ -10,7 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
-    const { playClick, playSuccess, playError } = useSound();
+    const { playClick, playSuccess, playError, playZap, playWarning } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
@@ -118,7 +118,11 @@ const Inventory = () => {
     }, [fetchData, initLoad]);
 
     const confirmAction = (actionType, item) => {
-        playClick();
+        if (actionType === 'CHECK_OUT') {
+            playWarning();
+        } else {
+            playClick();
+        }
         setModalState({
             isOpen: true,
             type: actionType,
@@ -243,7 +247,7 @@ const Inventory = () => {
                     <button className="nes-btn is-warning" onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
                     <button className="nes-btn is-primary" onClick={() => { playClick(); handleOpenLogs(); }} style={{ fontSize: '0.7rem' }}>LOGS</button>
                     <button className="nes-btn is-success" onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
-                    <button className="nes-btn is-error" onClick={logout} style={{ fontSize: '0.7rem' }}>EXIT</button>
+                    <button className="nes-btn is-error" onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
                 </div>
             </header>
 

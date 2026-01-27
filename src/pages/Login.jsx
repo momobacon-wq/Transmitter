@@ -9,14 +9,14 @@ import { useSound } from '../context/SoundContext';
 const Login = () => {
     const [inputVal, setInputVal] = useState('');
     const { login } = useGame();
-    const { playSuccess, playClick } = useSound();
+    const { playBootup, playClick } = useSound();
     const navigate = useNavigate();
 
     const handleStart = (e) => {
         e.preventDefault();
         if (!inputVal.trim()) return;
 
-        playSuccess(); // Coin sound on start!
+        playBootup(); // Gameboy boot sound!
         logLogin(inputVal); // Log the login event
         login(inputVal);
         navigate('/inventory');
