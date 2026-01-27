@@ -119,3 +119,21 @@ export const logLogin = async (employeeId) => {
         console.error("Login Log Error", error);
     }
 };
+
+export const checkUser = async (employeeId) => {
+    if (!API_URL) throw new Error("API URL missing");
+
+    try {
+        const response = await fetchWithTimeout(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'CHECK_USER', employeeId: employeeId })
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Check User Error:", error);
+        throw error;
+    }
+};
