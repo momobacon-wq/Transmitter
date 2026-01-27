@@ -41,8 +41,11 @@ function App() {
     return (
         <GameProvider>
             <SoundProvider>
+                <div className="crt-overlay"></div>
                 <Router>
-                    <AppContent />
+                    <div className="crt-container">
+                        <AppContent />
+                    </div>
                 </Router>
             </SoundProvider>
         </GameProvider>

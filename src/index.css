@@ -15,3 +15,83 @@ body {
 button {
     font-family: inherit;
 }
+
+/* CRT EFFECTS */
+:root {
+  --crt-flicker: 0.97;
+  --crt-scanline-color: rgba(18, 16, 16, 0.1); /* Dark scanlines */
+  --crt-vignette-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Scanlines moving */
+@keyframes scanline {
+  0% { transform: translateY(0%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Screen flicker */
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.9; }
+  15% { opacity: 0.95; }
+  20% { opacity: 0.99; }
+  25% { opacity: 0.95; }
+  30% { opacity: 0.9; }
+  35% { opacity: 0.96; }
+  40% { opacity: 0.98; }
+  45% { opacity: 0.95; }
+  50% { opacity: 0.99; }
+  55% { opacity: 0.93; }
+  60% { opacity: 0.9; }
+  65% { opacity: 0.96; }
+  70% { opacity: 1; }
+  75% { opacity: 0.97; }
+  80% { opacity: 0.95; }
+  85% { opacity: 0.93; }
+  90% { opacity: 0.9; }
+  95% { opacity: 0.98; }
+  100% { opacity: 0.97; }
+}
+
+/* Text glow */
+.nes-text, h1, h2, h3, span, p, button, input {
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.4), 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Main CRT Overlay Wrapper */
+.crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Let clicks pass through */
+    z-index: 9999;
+    background: 
+        /* Scanlines */
+        linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0) 50%,
+            var(--crt-scanline-color) 50%,
+            var(--crt-scanline-color)
+        ),
+        /* Vignette */
+        radial-gradient(
+            circle, 
+            rgba(0,0,0,0) 60%, 
+            var(--crt-vignette-color) 100%
+        );
+    background-size: 100% 4px, 100% 100%;
+    animation: flicker 0.15s infinite; /* Rapid subtle flicker */
+}
+
+/* Add a slight curvature feel to the whole page container */
+body {
+    overflow-x: hidden;
+}
+
+.crt-container {
+    animation: textShadow 1.6s infinite;
+}
