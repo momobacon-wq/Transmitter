@@ -23,8 +23,8 @@ const StatsModal = ({ isOpen, onClose, item, logs }) => {
         // 1. Filter logs for this item
         const itemLogs = logs.filter(log => log.partNumber === item.partNumber);
 
-        // 2. Sort by date (Oldest first)
-        itemLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+        // 2. Sort by date (Oldest first: Ascending)
+        itemLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
         // 3. Map to chart format
         // Recharts prefers simple objects. We need 'name' (Time) and 'value' (Balance)
