@@ -36,17 +36,20 @@ function AppContent() {
 }
 
 import { SoundProvider } from './context/SoundContext';
+import ScreensaverWrapper from './components/ScreensaverWrapper';
 
 function App() {
     return (
         <GameProvider>
             <SoundProvider>
-                <div className="crt-overlay"></div>
-                <Router>
-                    <div className="crt-container">
-                        <AppContent />
-                    </div>
-                </Router>
+                <ScreensaverWrapper timeoutMs={120000}>
+                    <div className="crt-overlay"></div>
+                    <Router>
+                        <div className="crt-container">
+                            <AppContent />
+                        </div>
+                    </Router>
+                </ScreensaverWrapper>
             </SoundProvider>
         </GameProvider>
     );
