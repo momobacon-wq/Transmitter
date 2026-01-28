@@ -28,7 +28,7 @@ const Login = () => {
                 playBootup();
                 speak("Welcome User");
                 logLogin(inputVal);
-                login(inputVal);
+                login(inputVal, res.name || ''); // Pass name
                 navigate('/inventory');
             } else {
                 playError();

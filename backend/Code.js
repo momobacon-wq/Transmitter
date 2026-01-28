@@ -5,12 +5,13 @@
  * 1. Open your Google Sheet.
  * 2. In "Inventory" sheet, Insert a new column after "Name" (Column B).
  * 3. Name the new Column C "Brand".
- * 4. Ensure header row is: [PartNumber, Name, Brand, Spec, Location, Quantity]
- *    (You can delete the old ImageSeed column if you want)
- * 5. Tools > Script editor.
- * 6. Replace ALL code with this new version.
- * 7. Deploy > New Deployment > Web App (Version: New, Desc: "v2 Brand Update").
- * 8. Copy the URL (it should be same if you update properly, but re-copy to be safe).
+ * 4. Ensure "Inventory" header row is: [PartNumber, Name, Brand, Spec, Location, Quantity]
+ * 5. Create a new Sheet named "Users".
+ * 6. In "Users" sheet, set header row: [EMPLOYEE_ID, EMPLOYEE_NAME]
+ * 7. Tools > Script editor.
+ * 8. Replace ALL code with this new version.
+ * 9. Deploy > New Deployment > Web App (Version: New, Desc: "v3 Users Name").
+ * 10. Copy the URL.
  */
 
 function doGet(e) {
@@ -99,6 +100,43 @@ function doPost(e) {
         const doc = SpreadsheetApp.getActiveSpreadsheet();
         const inventorySheet = doc.getSheetByName("Inventory");
         const logsSheet = doc.getSheetByName("Logs");
+
+        // === HANDLE CHECK USER ===
+        if (action === "CHECK_USER") {
+            const usersSheet = doc.getSheetByName("Users");
+            if (!usersSheet) {
+                // If no Users sheet, strictly we should fail, but for backward compat maybe... 
+                // No, user expects whitelist.
+                return ContentService.createTextOutput(JSON.stringify({
+                    status: "error",
+                    message: "Users sheet not found"
+                })).setMimeType(ContentService.MimeType.JSON);
+            }
+
+            const data = usersSheet.getDataRange().getValues();
+            // Col A = ID, Col B = Name
+            let foundName = null;
+
+            // Search (skip header)
+            for (let i = 1; i < data.length; i++) {
+                if (String(data[i][0]) === String(employeeId)) {
+                    foundName = data[i][1];
+                    break;
+                }
+            }
+
+            if (foundName) {
+                return ContentService.createTextOutput(JSON.stringify({
+                    status: "success",
+                    name: foundName
+                })).setMimeType(ContentService.MimeType.JSON);
+            } else {
+                return ContentService.createTextOutput(JSON.stringify({
+                    status: "error",
+                    message: "User ID not found"
+                })).setMimeType(ContentService.MimeType.JSON);
+            }
+        }
 
         // === HANDLE LOGIN LOG ===
         if (action === "LOGIN") {

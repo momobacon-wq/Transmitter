@@ -12,7 +12,7 @@ import RetroClock from '../components/RetroClock'; // [NEW]
 import RetroWeather from '../components/RetroWeather'; // [NEW]
 
 const Inventory = () => {
-    const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
+    const { employeeId, employeeName, logout, inventory, setInventory, setLoading, showMessage } = useGame(); // [NEW] employeeName
     const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playUIClose, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover, playBootup } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
@@ -327,6 +327,7 @@ const Inventory = () => {
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <i className="nes-icon coin"></i>
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
+                    {employeeName && <span style={{ marginLeft: '10px', color: '#f7d51d' }}>{employeeName}</span>}
                 </div>
 
                 {/* [NEW] Clock & Weather Widget */}
