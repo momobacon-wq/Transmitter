@@ -323,25 +323,25 @@ const Inventory = () => {
 
     return (
         <div>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '4px solid #fff', paddingBottom: '10px' }}>
-                <div>
+            <header style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '4px solid #fff', paddingBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                     <i className="nes-icon coin"></i>
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
                 </div>
 
                 {/* [NEW] Clock & Weather Widget */}
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <RetroClock />
                     <RetroWeather />
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <button className={`nes-btn ${showLowStock ? 'is-error' : 'is-warning'}`} onMouseEnter={playHover} onClick={() => { playClick(); setShowLowStock(!showLowStock); }} style={{ fontSize: '0.7rem' }}>
                         {showLowStock ? '! LOW ONLY' : '! LOW STOCK'}
                     </button>
                     <button className="nes-btn is-primary" onMouseEnter={playHover} onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
                     <button className="nes-btn is-primary" onMouseEnter={playHover} onClick={() => { playClick(); handleOpenLogs(); }} style={{ fontSize: '0.7rem' }}>LOGS</button>
-                    <button className="nes-btn is-success" onMouseEnter={playHover} onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
+                    <button className="nes-btn is-success" onMouseEnter={playHover} onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW</button>
                     <button className="nes-btn is-error" onMouseEnter={playHover} onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
                 </div>
             </header>
