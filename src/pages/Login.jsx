@@ -64,7 +64,7 @@ const Login = () => {
 
                 <form onSubmit={handleStart} style={{ marginTop: '2rem' }}>
                     <div className="nes-field">
-                        <label htmlFor="employee_id">請輸入姓名代號</label>
+                        <label htmlFor="employee_id" style={{ fontFamily: "'DotGothic16', sans-serif" }}>請輸入姓名代號</label>
                         <input
                             type="text"
                             id="employee_id"
