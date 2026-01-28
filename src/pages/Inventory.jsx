@@ -10,7 +10,7 @@ import SortModal from '../components/SortModal';
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
-    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playUIClose, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover } = useSound();
+    const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playUIClose, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover, playBootup } = useSound();
 
     // Local state for fetching status to avoid flickering if already loaded
     // Local state for fetching status to avoid flickering if already loaded
@@ -27,6 +27,7 @@ const Inventory = () => {
 
     const [sortConfig, setSortConfig] = useState({ field: 'partNumber', direction: 'asc' });
     const [searchQuery, setSearchQuery] = useState('');
+    const [showLowStock, setShowLowStock] = useState(false); // [NEW] Low Stock Filter State
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
     const [lastRefresh, setLastRefresh] = useState(Date.now());
@@ -135,7 +136,7 @@ const Inventory = () => {
         if (actionType === 'CHECK_OUT') {
             playWarning();
         } else {
-            playCheckIn(); // Use CheckIn sound as generic "Select" or "Power Up" context
+            playBootup(); // [MODIFIED] Use proper System Alert sound
         }
         playUIOpen();
         setModalState({
@@ -314,7 +315,10 @@ const Inventory = () => {
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="nes-btn is-warning" onMouseEnter={playHover} onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
+                    <button className={`nes-btn ${showLowStock ? 'is-error' : 'is-warning'}`} onMouseEnter={playHover} onClick={() => { playClick(); setShowLowStock(!showLowStock); }} style={{ fontSize: '0.7rem' }}>
+                        {showLowStock ? '! LOW ONLY' : '! LOW STOCK'}
+                    </button>
+                    <button className="nes-btn is-primary" onMouseEnter={playHover} onClick={() => { playClick(); setIsSortModalOpen(true); }} style={{ fontSize: '0.7rem' }}>SORT</button>
                     <button className="nes-btn is-primary" onMouseEnter={playHover} onClick={() => { playClick(); handleOpenLogs(); }} style={{ fontSize: '0.7rem' }}>LOGS</button>
                     <button className="nes-btn is-success" onMouseEnter={playHover} onClick={() => { playClick(); setIsAddModalOpen(true); }} style={{ fontSize: '0.7rem' }}>+ NEW ITEM</button>
                     <button className="nes-btn is-error" onMouseEnter={playHover} onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
@@ -367,6 +371,13 @@ const Inventory = () => {
                 }}>
                     {[...new Map(inventory.map(item => [item.partNumber, item])).values()] // Deduplicate by PartNumber
                         .filter(item => {
+                            // [NEW] Low Stock Filter Logic
+                            if (showLowStock) {
+                                const threshold = parseInt(import.meta.env.VITE_LOW_STOCK_THRESHOLD || 1, 10);
+                                const qty = parseInt(item.quantity, 10);
+                                if (isNaN(qty) || qty > threshold) return false;
+                            }
+
                             if (!searchQuery) return true;
 
                             // Split by comma (OR logic) for batch search
