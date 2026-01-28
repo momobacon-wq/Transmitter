@@ -7,7 +7,9 @@ import Modal from '../components/Modal';
 import AddItemModal from '../components/AddItemModal';
 import LogsModal from '../components/LogsModal';
 import SortModal from '../components/SortModal';
-import StatsModal from '../components/StatsModal'; // [NEW]
+import StatsModal from '../components/StatsModal';
+import RetroClock from '../components/RetroClock'; // [NEW]
+import RetroWeather from '../components/RetroWeather'; // [NEW]
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
@@ -326,6 +328,13 @@ const Inventory = () => {
                     <i className="nes-icon coin"></i>
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
                 </div>
+
+                {/* [NEW] Clock & Weather Widget */}
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <RetroClock />
+                    <RetroWeather />
+                </div>
+
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button className={`nes-btn ${showLowStock ? 'is-error' : 'is-warning'}`} onMouseEnter={playHover} onClick={() => { playClick(); setShowLowStock(!showLowStock); }} style={{ fontSize: '0.7rem' }}>
                         {showLowStock ? '! LOW ONLY' : '! LOW STOCK'}
