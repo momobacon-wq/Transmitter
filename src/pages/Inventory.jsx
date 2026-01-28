@@ -327,7 +327,7 @@ const Inventory = () => {
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <i className="nes-icon coin"></i>
                     <span style={{ marginLeft: '10px' }}>ID: {employeeId}</span>
-                    {employeeName && <span style={{ marginLeft: '10px', color: '#f7d51d' }}>{employeeName}</span>}
+                    {employeeName && <span style={{ marginLeft: '10px', color: '#f7d51d', fontSize: '1.2rem' }}>{employeeName}</span>}
                 </div>
 
                 {/* [NEW] Clock & Weather Widget */}
