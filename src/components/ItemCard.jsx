@@ -60,6 +60,14 @@ const ItemCard = ({ item, onAction }) => {
                         -
                     </button>
                     <button
+                        className="nes-btn"
+                        onClick={() => onAction('STATS', item)}
+                        style={{ padding: '0 10px' }}
+                        title="View Trends"
+                    >
+                        📈
+                    </button>
+                    <button
                         className="nes-btn is-primary"
                         onClick={() => onAction('CHECK_IN', item)}
                         style={{ padding: '0 10px' }}

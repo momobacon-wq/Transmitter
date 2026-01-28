@@ -37,7 +37,7 @@ npm install
 ```bash
 npm run dev
 ```
-啟動後，請開啟瀏覽器訪問顯示的網址 (通常是 `http://localhost:51173`)。
+啟動後，請開啟瀏覽器訪問顯示的網址 (通常是 `http://localhost:5173`)。
 
 ---
 

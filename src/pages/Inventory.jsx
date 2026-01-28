@@ -7,6 +7,7 @@ import Modal from '../components/Modal';
 import AddItemModal from '../components/AddItemModal';
 import LogsModal from '../components/LogsModal';
 import SortModal from '../components/SortModal';
+import StatsModal from '../components/StatsModal'; // [NEW]
 
 const Inventory = () => {
     const { employeeId, logout, inventory, setInventory, setLoading, showMessage } = useGame();
@@ -24,6 +25,7 @@ const Inventory = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
     const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+    const [statsModalState, setStatsModalState] = useState({ isOpen: false, item: null }); // [NEW] Stats Modal State
 
     const [sortConfig, setSortConfig] = useState({ field: 'partNumber', direction: 'asc' });
     const [searchQuery, setSearchQuery] = useState('');
@@ -132,7 +134,16 @@ const Inventory = () => {
 
 
 
+
     const confirmAction = (actionType, item) => {
+        if (actionType === 'STATS') {
+            // Special case: Open Stats immediately, maybe fetch logs if empty
+            playClick(); // Or playSort/playDataLoad
+            setStatsModalState({ isOpen: true, item: item });
+            handleOpenLogs(true); // Always fetch latest logs to ensure chart is up to date
+            return;
+        }
+
         if (actionType === 'CHECK_OUT') {
             playWarning();
         } else {
@@ -242,19 +253,19 @@ const Inventory = () => {
         }
     };
 
-    const handleOpenLogs = async () => {
-        setIsLogsModalOpen(true);
+    const handleOpenLogs = async (silent = false) => {
+        if (!silent) setIsLogsModalOpen(true);
         setLogsLoading(true);
         try {
             const res = await getLogs();
             if (res.status === 'success') {
                 setLogs(res.data);
             } else {
-                showMessage("LOGS ERROR", "error");
+                if (!silent) showMessage("LOGS ERROR", "error");
             }
         } catch (err) {
             console.error(err);
-            showMessage("FETCH FAILED", "error");
+            if (!silent) showMessage("FETCH FAILED", "error");
         } finally {
             setLogsLoading(false);
         }
@@ -297,6 +308,7 @@ const Inventory = () => {
                     setIsSortModalOpen(false);
                     setIsLogsModalOpen(false);
                     setModalState(prev => ({ ...prev, isOpen: false }));
+                    setStatsModalState(prev => ({ ...prev, isOpen: false })); // Close stats
                     if (document.activeElement.tagName === 'INPUT') {
                         document.activeElement.blur();
                     }
@@ -452,6 +464,13 @@ const Inventory = () => {
                 onClose={() => setIsSortModalOpen(false)}
                 onSort={handleSort}
                 currentSort={sortConfig}
+            />
+
+            <StatsModal
+                isOpen={statsModalState.isOpen}
+                onClose={() => setStatsModalState({ ...statsModalState, isOpen: false })}
+                item={statsModalState.item}
+                logs={logs}
             />
         </div>
     );
