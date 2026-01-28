@@ -38,7 +38,7 @@ const Login = () => {
         } catch (err) {
             console.error(err);
             playError();
-            setErrorMsg("CONNECTION ERROR / 連線錯誤");
+            setErrorMsg(`CONNECTION ERROR / 連線錯誤 (${err.message})`);
         } finally {
             setVerifying(false);
         }
