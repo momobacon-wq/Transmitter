@@ -86,7 +86,7 @@ const Login = () => {
                 </form>
             </div>
 
-            <p style={{ marginTop: '20px', fontSize: '0.8rem', color: '#666' }}>v1.0.0 8-BIT EDITION</p>
+            <p style={{ marginTop: '20px', fontSize: '0.8rem', color: '#666' }}>v1.1.0 8-BIT EDITION</p>
         </div>
     );
 };
