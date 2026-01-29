@@ -27,12 +27,21 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
         }
     };
 
+    const [confirmClear, setConfirmClear] = React.useState(false);
+
     const handleClear = () => {
-        playWarning();
-        if (confirm("Clear all pending items?")) {
-            clearCart();
-            onClose();
+        if (!confirmClear) {
+            playWarning();
+            setConfirmClear(true);
+            // Auto-reset confirmation after 3 seconds
+            setTimeout(() => setConfirmClear(false), 3000);
+            return;
         }
+
+        // Confirmed
+        playClick(); // Or playZap for destruction
+        clearCart();
+        onClose();
     };
 
     return (
@@ -93,7 +102,7 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                     <button className="nes-btn is-error" onClick={handleClear} disabled={items.length === 0 || submitting}>
-                        CLEAR
+                        {confirmClear ? 'REALLY?' : 'CLEAR'}
                     </button>
                     <button className="nes-btn" onClick={() => { playUIClose(); onClose(); }} disabled={submitting}>
                         CANCEL
