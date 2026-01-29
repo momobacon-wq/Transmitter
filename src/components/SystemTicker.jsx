@@ -34,7 +34,7 @@ const SystemTicker = ({ inventory }) => {
         // We assume "Model" = PartNumber (User terminology in ItemCard)
         const action = log.action.includes('IN') || log.changeAmount > 0 ? 'RETURNED' : 'TOOK';
         const qty = Math.abs(log.changeAmount);
-        return `LAST TRANSACTION >> ${action} ${log.partNumber} x${qty}`;
+        return `LAST TRANSACTION >> ID:${log.employeeId} ${action} ${log.partNumber} x${qty}`;
     };
 
     return (
