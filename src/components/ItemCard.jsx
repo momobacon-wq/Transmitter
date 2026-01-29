@@ -1,3 +1,4 @@
+import { useCart } from '../context/CartContext';
 import PropTypes from 'prop-types';
 
 const ItemCard = ({ item, onAction }) => {
@@ -9,8 +10,28 @@ const ItemCard = ({ item, onAction }) => {
     // Always keep 'is-dark' to match theme, append 'is-error' for red border if needed
     const containerClass = `nes-container is-rounded is-dark ${isLowStock ? 'is-error' : ''}`;
 
+    const { cartItems } = useCart();
+    const cartItem = cartItems[partNumber];
+    const pendingChange = cartItem ? cartItem.changeAmount : 0;
+
     return (
-        <div className={containerClass} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column' }}>
+        <div className={containerClass} style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+
+            {pendingChange !== 0 && (
+                <div style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '-10px',
+                    backgroundColor: pendingChange > 0 ? '#92cc41' : '#e76e55',
+                    color: '#fff',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    zIndex: 10,
+                    boxShadow: '2px 2px 0px #000'
+                }}>
+                    {pendingChange > 0 ? '+' : ''}{pendingChange}
+                </div>
+            )}
 
 
             <div style={{ display: 'flex', gap: '1rem' }}>

@@ -36,20 +36,23 @@ function AppContent() {
 }
 
 import { SoundProvider } from './context/SoundContext';
+import { CartProvider } from './context/CartContext';
 import ScreensaverWrapper from './components/ScreensaverWrapper';
 
 function App() {
     return (
         <GameProvider>
             <SoundProvider>
-                <ScreensaverWrapper timeoutMs={120000}>
-                    <div className="crt-overlay"></div>
-                    <Router>
-                        <div className="crt-container">
-                            <AppContent />
-                        </div>
-                    </Router>
-                </ScreensaverWrapper>
+                <CartProvider>
+                    <ScreensaverWrapper timeoutMs={120000}>
+                        <div className="crt-overlay"></div>
+                        <Router>
+                            <div className="crt-container">
+                                <AppContent />
+                            </div>
+                        </Router>
+                    </ScreensaverWrapper>
+                </CartProvider>
             </SoundProvider>
         </GameProvider>
     );

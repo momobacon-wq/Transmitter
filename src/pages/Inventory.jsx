@@ -8,15 +8,17 @@ import AddItemModal from '../components/AddItemModal';
 import LogsModal from '../components/LogsModal';
 import SortModal from '../components/SortModal';
 import StatsModal from '../components/StatsModal';
-import RetroClock from '../components/RetroClock'; // [NEW]
-import RetroWeather from '../components/RetroWeather'; // [NEW]
+import { useCart } from '../context/CartContext'; // [NEW]
+import CartModal from '../components/CartModal'; // [NEW]
+import RetroClock from '../components/RetroClock';
+import RetroWeather from '../components/RetroWeather';
 
 const Inventory = () => {
-    const { employeeId, employeeName, logout, inventory, setInventory, setLoading, showMessage } = useGame(); // [NEW] employeeName
+    const { employeeId, employeeName, logout, inventory, setInventory, setLoading, showMessage } = useGame();
     const { playClick, playSuccess, playError, playZap, playWarning, playKeystroke, playDataLoad, playUIOpen, playUIClose, playRetroAlarm, playPowerDown, speak, playCheckIn, playCheckOut, playHover, playBootup } = useSound();
+    const { addToCart, totalItems } = useCart(); // [NEW]
 
-    // Local state for fetching status to avoid flickering if already loaded
-    // Local state for fetching status to avoid flickering if already loaded
+    // Local state
     const [initLoad, setInitLoad] = useState(true);
     const [loadStatus, setLoadStatus] = useState("LOADING CARTRIDGE...");
     const [fetchError, setFetchError] = useState(null);
@@ -27,11 +29,13 @@ const Inventory = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
     const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-    const [statsModalState, setStatsModalState] = useState({ isOpen: false, item: null }); // [NEW] Stats Modal State
+    const [statsModalState, setStatsModalState] = useState({ isOpen: false, item: null });
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false); // [NEW]
 
     const [sortConfig, setSortConfig] = useState({ field: 'partNumber', direction: 'asc' });
     const [searchQuery, setSearchQuery] = useState('');
-    const [showLowStock, setShowLowStock] = useState(false); // [NEW] Low Stock Filter State
+    const [showLowStock, setShowLowStock] = useState(false);
+    const [isCartMode, setIsCartMode] = useState(false); // [NEW] Cart Mode State
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
     const [lastRefresh, setLastRefresh] = useState(Date.now());
@@ -139,17 +143,23 @@ const Inventory = () => {
 
     const confirmAction = (actionType, item) => {
         if (actionType === 'STATS') {
-            // Special case: Open Stats immediately, maybe fetch logs if empty
-            playClick(); // Or playSort/playDataLoad
+            playClick();
             setStatsModalState({ isOpen: true, item: item });
-            handleOpenLogs(true); // Always fetch latest logs to ensure chart is up to date
+            handleOpenLogs(true);
+            return;
+        }
+
+        // [NEW] Cart Logic
+        if (isCartMode && (actionType === 'CHECK_IN' || actionType === 'CHECK_OUT')) {
+            const amount = actionType === 'CHECK_IN' ? 1 : -1;
+            addToCart(item, amount);
             return;
         }
 
         if (actionType === 'CHECK_OUT') {
             playWarning();
         } else {
-            playBootup(); // [MODIFIED] Use proper System Alert sound
+            playBootup();
         }
         playUIOpen();
         setModalState({
@@ -337,6 +347,9 @@ const Inventory = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button className={`nes-btn ${isCartMode ? 'is-primary' : ''}`} onMouseEnter={playHover} onClick={() => { playClick(); setIsCartMode(!isCartMode); }} style={{ fontSize: '0.7rem' }}>
+                        {isCartMode ? '🛒 BULK MODE: ON' : '🛒 BULK MODE: OFF'}
+                    </button>
                     <button className={`nes-btn ${showLowStock ? 'is-error' : 'is-warning'}`} onMouseEnter={playHover} onClick={() => { playClick(); setShowLowStock(!showLowStock); }} style={{ fontSize: '0.7rem' }}>
                         {showLowStock ? '! LOW ONLY' : '! LOW STOCK'}
                     </button>
@@ -346,6 +359,29 @@ const Inventory = () => {
                     <button className="nes-btn is-error" onMouseEnter={playHover} onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
                 </div>
             </header>
+
+            {/* [NEW] Floating Cart Button */}
+            {totalItems > 0 && (
+                <button
+                    className="nes-btn is-primary"
+                    onClick={() => { playClick(); setIsCartModalOpen(true); }}
+                    style={{
+                        position: 'fixed',
+                        bottom: '30px',
+                        right: '30px',
+                        zIndex: 1000,
+                        boxShadow: '4px 4px 0px #000',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                    }}
+                >
+                    <span>🛒 REVIEW</span>
+                    <span className="nes-badge is-icon">
+                        <span className="is-warning">{totalItems}</span>
+                    </span>
+                </button>
+            )}
 
             <div style={{ marginBottom: '20px' }}>
                 <div className="nes-field is-inline" style={{ marginBottom: '20px' }}>
@@ -481,6 +517,12 @@ const Inventory = () => {
                 onClose={() => setStatsModalState({ ...statsModalState, isOpen: false })}
                 item={statsModalState.item}
                 logs={logs}
+            />
+
+            <CartModal
+                isOpen={isCartModalOpen}
+                onClose={() => setIsCartModalOpen(false)}
+                onRefresh={fetchData}
             />
         </div>
     );

@@ -130,10 +130,33 @@ export const checkUser = async (employeeId) => {
             body: JSON.stringify({ action: 'CHECK_USER', employeeId: employeeId })
         });
 
-        const data = await response.json();
         return data;
     } catch (error) {
         console.error("Check User Error:", error);
+        throw error;
+    }
+};
+
+export const batchTransaction = async (items) => {
+    if (!API_URL) throw new Error("API URL missing");
+
+    try {
+        const payload = {
+            action: 'BATCH_TRANSACTION',
+            employeeId: localStorage.getItem('EMPLOYEE_ID') || 'UNKNOWN',
+            items: items // [{ partNumber, changeAmount }]
+        };
+
+        const response = await fetchWithTimeout(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Batch Transaction Error:", error);
         throw error;
     }
 };

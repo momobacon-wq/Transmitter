@@ -10,7 +10,7 @@
  * 6. In "Users" sheet, set header row: [EMPLOYEE_ID, EMPLOYEE_NAME]
  * 7. Tools > Script editor.
  * 8. Replace ALL code with this new version.
- * 9. Deploy > New Deployment > Web App (Version: New, Desc: "v3 Users Name").
+ * 9. Deploy > New Deployment > Web App (Version: New, Desc: "v4 Batch Support").
  * 10. Copy the URL.
  */
 
@@ -136,6 +136,55 @@ function doPost(e) {
                     message: "User ID not found"
                 })).setMimeType(ContentService.MimeType.JSON);
             }
+        }
+
+        // === HANDLE BATCH TRANSACTION (SHOPPING CART) ===
+        if (action === "BATCH_TRANSACTION") {
+            // items: [{ partNumber, changeAmount }]
+            const items = postData.items;
+            const data = inventorySheet.getDataRange().getValues();
+            const now = new Date();
+
+            // 1. Process each item
+            items.forEach(item => {
+                let rowIndex = -1;
+                let currentQty = 0;
+
+                // Find item
+                for (let i = 1; i < data.length; i++) {
+                    if (data[i][0] == item.partNumber) {
+                        rowIndex = i;
+                        currentQty = parseInt(data[i][5]) || 0;
+                        break;
+                    }
+                }
+
+                if (rowIndex !== -1) {
+                    const newQty = currentQty + parseInt(item.changeAmount);
+                    // Update sheet
+                    inventorySheet.getRange(rowIndex + 1, 6).setValue(newQty);
+
+                    // Update local data array so subsequent checks in same batch serve correct data (if duplicate items sent)
+                    // ...though typical cart merges duplicates.
+                    data[rowIndex][5] = newQty;
+
+                    // Log
+                    logsSheet.insertRowBefore(2);
+                    logsSheet.getRange(2, 1, 1, 6).setValues([[
+                        now,
+                        employeeId,
+                        "BATCH_" + (item.changeAmount >= 0 ? "IN" : "OUT"),
+                        item.partNumber,
+                        item.changeAmount,
+                        newQty
+                    ]]);
+                }
+            });
+
+            return ContentService.createTextOutput(JSON.stringify({
+                status: "success",
+                message: "Batch transaction completed"
+            })).setMimeType(ContentService.MimeType.JSON);
         }
 
         // === HANDLE LOGIN LOG ===
