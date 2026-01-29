@@ -10,8 +10,8 @@ const SystemTicker = ({ inventory }) => {
         try {
             const res = await getLogs();
             if (res.status === 'success') {
-                // Get last 10 logs
-                setRecentLogs(res.data.slice(0, 10));
+                // Get ONLY the last log
+                setRecentLogs(res.data.slice(0, 1));
             }
         } catch (error) {
             console.error("Ticker fetch failed", error);
@@ -22,32 +22,26 @@ const SystemTicker = ({ inventory }) => {
 
     useEffect(() => {
         fetchRecent();
-        const interval = setInterval(fetchRecent, 60000); // Update every minute
+        const interval = setInterval(fetchRecent, 10000); // Check faster (10s) since we only show 1
         return () => clearInterval(interval);
     }, []);
 
     if (loading || recentLogs.length === 0) return null;
 
-    // Helper to find item name
-    const getItemName = (partNumber) => {
-        const item = inventory.find(i => i.partNumber === partNumber);
-        return item ? item.name : partNumber;
-    };
-
     // Helper to format log text
     const formatLog = (log) => {
-        const time = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const name = getItemName(log.partNumber);
+        // User requested: "上一個人拿的東西型號與數量" (Last person's Item Model & Qty)
+        // We assume "Model" = PartNumber (User terminology in ItemCard)
         const action = log.action.includes('IN') || log.changeAmount > 0 ? 'RETURNED' : 'TOOK';
         const qty = Math.abs(log.changeAmount);
-        return `[${time}] ID:${log.employeeId} ${action} ${qty}x ${name}`;
+        return `LAST TRANSACTION >> ${action} ${log.partNumber} x${qty}`;
     };
 
     return (
         <div style={{
             width: '100%',
             backgroundColor: '#000',
-            color: '#0f0', // Hacker green
+            color: '#0f0',
             borderBottom: '2px solid #333',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
@@ -58,7 +52,7 @@ const SystemTicker = ({ inventory }) => {
         }}>
             <div style={{
                 display: 'inline-block',
-                animation: 'marquee 30s linear infinite',
+                animation: 'marquee 20s linear infinite', // Constant slow scroll for single item
                 paddingLeft: '100%'
             }}>
                 {recentLogs.map((log, index) => (
