@@ -97,26 +97,10 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
                                                     className="nes-btn is-error"
                                                     style={{ padding: '0 5px', fontSize: '0.6rem' }}
                                                     onClick={() => {
-                                                        // Decrease magnitude (towards 0, or increase negativity if negative?)
-                                                        // Actually user typically wants to "Remove one" or "Add one".
-                                                        // If it's a "Check IN" (+), decrementing reduces IN amount.
-                                                        // If it's a "Check OUT" (-), "Add one" means taking MORE (-1 -> -2). 
-                                                        // This ambiguity is tricky.
-                                                        // Let's stick to absolute count? 
-                                                        // Or just follow: 
-                                                        // [-] = -1 change (Check OUT more or Check IN less)
-                                                        // [+] = +1 change (Check IN more or Check OUT less)
-                                                        // BUT usually in cart: 
-                                                        // If I have "Take 5", [-] should make it "Take 4". (+1 to negative value)
-                                                        // If I have "Return 5", [-] should make it "Return 4". (-1 to positive value)
-
-                                                        // SIMPLE LOGIC:
-                                                        // If changeAmount > 0 (Returning), [-] means `addToCart(item, -1)`
-                                                        // If changeAmount < 0 (Taking), [-] means `addToCart(item, 1)` (Reduce debt)
-
-                                                        const isReturning = entry.changeAmount > 0;
-                                                        // "Reduce Count" button
-                                                        addToCart(entry.item, isReturning ? -1 : 1);
+                                                        // Standardized: [-] Button always subtracts 1.
+                                                        // If Taking (-1), becomes -2 (Take More).
+                                                        // If Returning (+1), becomes 0 (Return Less).
+                                                        addToCart(entry.item, -1);
                                                         playClick();
                                                     }}
                                                 >-</button>
@@ -129,9 +113,10 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
                                                     className="nes-btn is-success"
                                                     style={{ padding: '0 5px', fontSize: '0.6rem' }}
                                                     onClick={() => {
-                                                        // "Increase Count" button
-                                                        const isReturning = entry.changeAmount > 0;
-                                                        addToCart(entry.item, isReturning ? 1 : -1);
+                                                        // Standardized: [+] Button always adds 1.
+                                                        // If Taking (-1), becomes 0 (Take Less).
+                                                        // If Returning (+1), becomes +2 (Return More).
+                                                        addToCart(entry.item, 1);
                                                         playClick();
                                                     }}
                                                 >+</button>
