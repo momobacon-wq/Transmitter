@@ -68,7 +68,9 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const totalItems = useMemo(() => Object.keys(cartItems).length, [cartItems]);
+    const totalItems = useMemo(() => {
+        return Object.values(cartItems).reduce((acc, curr) => acc + Math.abs(curr.changeAmount), 0);
+    }, [cartItems]);
 
     return (
         <CartContext.Provider value={{
