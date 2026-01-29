@@ -101,14 +101,14 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
                     )}
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                    <button className="nes-btn is-error" onClick={handleClear} disabled={items.length === 0 || submitting}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    <button className="nes-btn is-error" onClick={handleClear} disabled={items.length === 0 || submitting} style={{ flex: '1 1 auto', minWidth: '80px', fontSize: '0.8rem' }}>
                         {confirmClear ? 'REALLY?' : 'CLEAR'}
                     </button>
-                    <button className="nes-btn" onClick={() => { playUIClose(); onClose(); }} disabled={submitting}>
+                    <button className="nes-btn" onClick={() => { playUIClose(); onClose(); }} disabled={submitting} style={{ flex: '1 1 auto', minWidth: '80px', fontSize: '0.8rem' }}>
                         CANCEL
                     </button>
-                    <button className={`nes-btn ${submitting ? 'is-disabled' : 'is-success'}`} onClick={handleConfirm} disabled={items.length === 0 || submitting}>
+                    <button className={`nes-btn ${submitting ? 'is-disabled' : 'is-success'}`} onClick={handleConfirm} disabled={items.length === 0 || submitting} style={{ flex: '1 1 100%', minWidth: '120px', fontSize: '0.9rem' }}>
                         {submitting ? 'PROCESSING...' : 'CONFIRM ALL'}
                     </button>
                 </div>

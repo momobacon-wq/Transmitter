@@ -367,13 +367,15 @@ const Inventory = () => {
                     onClick={() => { playClick(); setIsCartModalOpen(true); }}
                     style={{
                         position: 'fixed',
-                        bottom: '30px',
-                        right: '30px',
+                        bottom: '20px',
+                        right: '20px',
                         zIndex: 1000,
                         boxShadow: '4px 4px 0px #000',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px'
+                        gap: '8px',
+                        fontSize: '0.8rem',
+                        padding: '10px'
                     }}
                 >
                     <span>🛒 REVIEW</span>
