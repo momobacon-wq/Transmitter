@@ -10,11 +10,14 @@ const SystemTicker = ({ inventory }) => {
         try {
             const res = await getLogs();
             if (res.status === 'success' && res.data.length > 0) {
-                // Get ONLY the last log
-                const lastLog = res.data.slice(0, 1);
-                setRecentLogs(lastLog);
-                // Persist to localStorage
-                localStorage.setItem('LAST_SYSTEM_LOG', JSON.stringify(lastLog));
+                // Find the first log that is NOT a LOGIN event (actual transaction)
+                const validLog = res.data.find(log => log.action !== 'LOGIN');
+
+                if (validLog) {
+                    const lastLog = [validLog];
+                    setRecentLogs(lastLog);
+                    localStorage.setItem('LAST_SYSTEM_LOG', JSON.stringify(lastLog));
+                }
             } else if (res.status === 'success' && res.data.length === 0) {
                 // If connection success but no logs (e.g. empty sheet), try to keep old one or clear?
                 // User wants to see "Last person", so keep showing old one is better than empty.
