@@ -9,9 +9,16 @@ const SystemTicker = ({ inventory }) => {
     const fetchRecent = async () => {
         try {
             const res = await getLogs();
-            if (res.status === 'success') {
+            if (res.status === 'success' && res.data.length > 0) {
                 // Get ONLY the last log
-                setRecentLogs(res.data.slice(0, 1));
+                const lastLog = res.data.slice(0, 1);
+                setRecentLogs(lastLog);
+                // Persist to localStorage
+                localStorage.setItem('LAST_SYSTEM_LOG', JSON.stringify(lastLog));
+            } else if (res.status === 'success' && res.data.length === 0) {
+                // If connection success but no logs (e.g. empty sheet), try to keep old one or clear?
+                // User wants to see "Last person", so keep showing old one is better than empty.
+                // Do nothing, let existing state persist or fallback below.
             }
         } catch (error) {
             console.error("Ticker fetch failed", error);
@@ -21,6 +28,17 @@ const SystemTicker = ({ inventory }) => {
     };
 
     useEffect(() => {
+        // Load from local storage initially
+        const savedLog = localStorage.getItem('LAST_SYSTEM_LOG');
+        if (savedLog) {
+            try {
+                setRecentLogs(JSON.parse(savedLog));
+                setLoading(false);
+            } catch (e) {
+                console.error("Failed to parse saved log", e);
+            }
+        }
+
         fetchRecent();
         const interval = setInterval(fetchRecent, 10000); // Check faster (10s) since we only show 1
         return () => clearInterval(interval);
