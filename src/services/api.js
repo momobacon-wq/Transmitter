@@ -130,6 +130,7 @@ export const checkUser = async (employeeId) => {
             body: JSON.stringify({ action: 'CHECK_USER', employeeId: employeeId })
         });
 
+        const data = await response.json();
         return data;
     } catch (error) {
         console.error("Check User Error:", error);
