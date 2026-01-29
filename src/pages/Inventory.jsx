@@ -35,7 +35,7 @@ const Inventory = () => {
     const [sortConfig, setSortConfig] = useState({ field: 'partNumber', direction: 'asc' });
     const [searchQuery, setSearchQuery] = useState('');
     const [showLowStock, setShowLowStock] = useState(false);
-    const [isCartMode, setIsCartMode] = useState(false); // [NEW] Cart Mode State
+    const [isCartMode, setIsCartMode] = useState(true); // [NEW] Cart Mode State
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
     const [lastRefresh, setLastRefresh] = useState(Date.now());
