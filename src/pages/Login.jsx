@@ -22,7 +22,7 @@ const Login = () => {
         setErrorMsg('');
 
         try {
-            const res = await checkUser(inputVal);
+            const res = await checkUser(inputVal.trim());
 
             if (res.status === 'success') {
                 playBootup();

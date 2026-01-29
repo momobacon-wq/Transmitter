@@ -119,7 +119,7 @@ function doPost(e) {
 
             // Search (skip header)
             for (let i = 1; i < data.length; i++) {
-                if (String(data[i][0]) === String(employeeId)) {
+                if (String(data[i][0]).trim() === String(employeeId).trim()) {
                     foundName = data[i][1];
                     break;
                 }
