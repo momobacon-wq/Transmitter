@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useSound } from '../context/SoundContext';
 
 const CartModal = ({ isOpen, onClose, onRefresh }) => {
-    const { cartItems, submitCart, clearCart } = useCart();
+    const { cartItems, submitCart, clearCart, addToCart } = useCart();
     const { playClick, playUIClose, playWarning } = useSound();
     const [submitting, setSubmitting] = React.useState(false);
     const [confirmClear, setConfirmClear] = React.useState(false);
@@ -92,7 +92,50 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
                                             color: entry.changeAmount > 0 ? '#92cc41' : '#e76e55',
                                             textAlign: 'center'
                                         }}>
-                                            {entry.changeAmount > 0 ? '+' : ''}{entry.changeAmount}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                                <button
+                                                    className="nes-btn is-error"
+                                                    style={{ padding: '0 5px', fontSize: '0.6rem' }}
+                                                    onClick={() => {
+                                                        // Decrease magnitude (towards 0, or increase negativity if negative?)
+                                                        // Actually user typically wants to "Remove one" or "Add one".
+                                                        // If it's a "Check IN" (+), decrementing reduces IN amount.
+                                                        // If it's a "Check OUT" (-), "Add one" means taking MORE (-1 -> -2). 
+                                                        // This ambiguity is tricky.
+                                                        // Let's stick to absolute count? 
+                                                        // Or just follow: 
+                                                        // [-] = -1 change (Check OUT more or Check IN less)
+                                                        // [+] = +1 change (Check IN more or Check OUT less)
+                                                        // BUT usually in cart: 
+                                                        // If I have "Take 5", [-] should make it "Take 4". (+1 to negative value)
+                                                        // If I have "Return 5", [-] should make it "Return 4". (-1 to positive value)
+
+                                                        // SIMPLE LOGIC:
+                                                        // If changeAmount > 0 (Returning), [-] means `addToCart(item, -1)`
+                                                        // If changeAmount < 0 (Taking), [-] means `addToCart(item, 1)` (Reduce debt)
+
+                                                        const isReturning = entry.changeAmount > 0;
+                                                        // "Reduce Count" button
+                                                        addToCart(entry.item, isReturning ? -1 : 1);
+                                                        playClick();
+                                                    }}
+                                                >-</button>
+
+                                                <span style={{ minWidth: '30px' }}>
+                                                    {entry.changeAmount > 0 ? '+' : ''}{entry.changeAmount}
+                                                </span>
+
+                                                <button
+                                                    className="nes-btn is-success"
+                                                    style={{ padding: '0 5px', fontSize: '0.6rem' }}
+                                                    onClick={() => {
+                                                        // "Increase Count" button
+                                                        const isReturning = entry.changeAmount > 0;
+                                                        addToCart(entry.item, isReturning ? 1 : -1);
+                                                        playClick();
+                                                    }}
+                                                >+</button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
