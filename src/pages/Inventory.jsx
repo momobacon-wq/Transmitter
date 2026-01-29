@@ -12,6 +12,7 @@ import { useCart } from '../context/CartContext'; // [NEW]
 import CartModal from '../components/CartModal'; // [NEW]
 import RetroClock from '../components/RetroClock';
 import RetroWeather from '../components/RetroWeather';
+import SystemTicker from '../components/SystemTicker'; // [NEW]
 
 const Inventory = () => {
     const { employeeId, employeeName, logout, inventory, setInventory, setLoading, showMessage } = useGame();
@@ -359,6 +360,11 @@ const Inventory = () => {
                     <button className="nes-btn is-error" onMouseEnter={playHover} onClick={() => { playZap(); logout(); }} style={{ fontSize: '0.7rem' }}>EXIT</button>
                 </div>
             </header>
+
+            {/* [NEW] System Ticker */}
+            <div style={{ marginBottom: '20px' }}>
+                <SystemTicker inventory={inventory} />
+            </div>
 
             {/* [NEW] Floating Cart Button */}
             {totalItems > 0 && (
