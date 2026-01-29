@@ -505,11 +505,17 @@ export const SoundProvider = ({ children }) => {
     };
 
     const toggleMute = () => {
-        setMuted(prev => {
-            const next = !prev;
-            if (next) window.speechSynthesis.cancel();
-            return next;
-        });
+        try {
+            setMuted(prev => {
+                const next = !prev;
+                if (next && window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+                return next;
+            });
+        } catch (error) {
+            console.error("Error toggling mute:", error);
+        }
     };
 
     return (
