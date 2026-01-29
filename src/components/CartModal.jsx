@@ -7,6 +7,7 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
     const { cartItems, submitCart, clearCart } = useCart();
     const { playClick, playUIClose, playWarning } = useSound();
     const [submitting, setSubmitting] = React.useState(false);
+    const [confirmClear, setConfirmClear] = React.useState(false);
 
     if (!isOpen) return null;
 
@@ -27,7 +28,7 @@ const CartModal = ({ isOpen, onClose, onRefresh }) => {
         }
     };
 
-    const [confirmClear, setConfirmClear] = React.useState(false);
+
 
     const handleClear = () => {
         if (!confirmClear) {
